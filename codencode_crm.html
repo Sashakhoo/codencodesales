@@ -1,0 +1,496 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>codencode Academy — CRM</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="https://cdn.jsdelivr.net/npm/@tabler/icons-webfont@2.44.0/tabler-icons.min.css">
+<style>
+:root{--navy:#0A1628;--navy-l:#152240;--cyan:#4ECFBF;--cyan-d:#2AA89A;--gold:#C9A84C;--bg:#F7F8FA;--surface:#FFFFFF;--s2:#F0F2F6;--border:#E2E6EE;--border2:#C8CFD8;--text:#0D1B2A;--text2:#5A6478;--text3:#9AA3B0;--success:#12896A;--sbg:#E0F5EE;--warn:#8B5E10;--wbg:#FDF0D8;--danger:#A32020;--dbg:#FDEAEA;--info:#1254A0;--ibg:#E5EEFA;--purple:#4A3BAA;--pbg:#EDEAFC;--pink:#8B2455;--pkbg:#FAEAF1;--r:8px;--rl:13px;--sh:0 1px 4px rgba(10,22,40,.08)}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
+.layout{display:flex;min-height:100vh}
+.sidebar{width:220px;background:var(--navy);flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
+.sb-logo{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
+.logo-mark{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:var(--cyan);letter-spacing:-1px}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;text-transform:uppercase;letter-spacing:.07em}
+.sb-sec{padding:14px 14px 5px;font-size:10px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.09em;font-weight:600}
+.nav{display:flex;align-items:center;gap:9px;padding:8px 13px;margin:2px 7px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;transition:all .15s}
+.nav:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
+.nav.active{background:rgba(78,207,191,.15);color:var(--cyan)}
+.nav i{font-size:15px;flex-shrink:0}
+.nb{margin-left:auto;background:var(--cyan);color:var(--navy);font-size:10px;font-weight:700;padding:1px 6px;border-radius:20px}
+.nb.r{background:#E24B4A;color:#fff}
+.sb-foot{margin-top:auto;padding:13px 15px;border-top:1px solid rgba(255,255,255,.07);font-size:11px;color:rgba(255,255,255,.3)}
+.sb-foot strong{color:rgba(255,255,255,.5);display:block;margin-bottom:2px}
+.main{flex:1;min-width:0;display:flex;flex-direction:column}
+.topbar{background:var(--surface);border-bottom:1px solid var(--border);padding:0 22px;height:54px;display:flex;align-items:center;justify-content:space-between;gap:12px;position:sticky;top:0;z-index:50}
+.page-title{font-size:14px;font-weight:600;color:var(--text)}
+.topbar-r{display:flex;gap:7px}
+.btn{display:inline-flex;align-items:center;gap:5px;padding:7px 13px;border-radius:6px;font-size:13px;font-weight:500;cursor:pointer;border:1px solid var(--border2);background:var(--surface);color:var(--text);transition:all .15s;font-family:'DM Sans',sans-serif}
+.btn:hover{background:var(--s2)}
+.btn-p{background:var(--navy);color:#fff;border-color:var(--navy)}
+.btn-p:hover{background:var(--navy-l)}
+.btn-c{background:var(--cyan);color:var(--navy);border-color:var(--cyan);font-weight:700}
+.btn-c:hover{background:var(--cyan-d);border-color:var(--cyan-d)}
+.btn-sm{padding:5px 10px;font-size:12px}
+.content{padding:22px;flex:1}
+.kg{display:grid;grid-template-columns:repeat(auto-fit,minmax(135px,1fr));gap:10px;margin-bottom:22px}
+.kc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:13px 15px;box-shadow:var(--sh)}
+.kl{font-size:10px;color:var(--text3);font-weight:600;text-transform:uppercase;letter-spacing:.05em;margin-bottom:5px}
+.kv{font-family:'Space Mono',monospace;font-size:22px;font-weight:700;color:var(--text);line-height:1}
+.kv.g{color:var(--success)}.kv.a{color:var(--gold)}.kv.r{color:var(--danger)}.kv.b{color:var(--info)}.kv.c{color:var(--cyan-d)}
+.ks{font-size:10px;color:var(--text3);margin-top:3px}
+.ac{height:2px;border-radius:2px;margin-top:10px}
+.panel{display:none}.panel.active{display:block}
+.fb{display:flex;gap:7px;flex-wrap:wrap;align-items:center;margin-bottom:12px}
+.sw{position:relative}
+.sw i{position:absolute;left:8px;top:50%;transform:translateY(-50%);color:var(--text3);font-size:14px;pointer-events:none}
+.si{padding:7px 9px 7px 28px;border:1px solid var(--border2);border-radius:6px;font-size:13px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;width:210px}
+.si:focus{outline:none;border-color:var(--cyan-d)}
+.fsel{padding:7px 9px;border:1px solid var(--border2);border-radius:6px;font-size:12px;background:var(--surface);color:var(--text);font-family:'DM Sans',sans-serif;cursor:pointer}
+.fsel:focus{outline:none;border-color:var(--cyan-d)}
+.tc{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);overflow:hidden;box-shadow:var(--sh)}
+.tw{overflow-x:auto}
+table{width:100%;border-collapse:collapse;font-size:12.5px;table-layout:fixed}
+thead{background:var(--s2)}
+th{padding:9px 11px;text-align:left;font-size:10px;font-weight:700;color:var(--text2);text-transform:uppercase;letter-spacing:.06em;white-space:nowrap;border-bottom:1px solid var(--border)}
+td{padding:9px 11px;border-bottom:1px solid var(--border);vertical-align:top;color:var(--text)}
+tr:last-child td{border-bottom:none}
+tr:hover td{background:#F8FAFD}
+.tf{padding:9px 13px;font-size:11px;color:var(--text3);border-top:1px solid var(--border);background:var(--s2)}
+.pill{display:inline-flex;align-items:center;gap:3px;font-size:10px;font-weight:500;padding:2px 8px;border-radius:20px;white-space:nowrap}
+.pill i{font-size:11px}
+.p-new{background:var(--sbg);color:var(--success)}.p-replied{background:var(--ibg);color:var(--info)}.p-qualified{background:#EAF4DE;color:#2E6010}.p-converted{background:var(--wbg);color:var(--warn)}.p-nurture{background:var(--pbg);color:var(--purple)}.p-lost{background:var(--s2);color:var(--text2)}
+.p-wa{background:#E0F5EE;color:#0A6E4A}.p-xhs{background:#FDEAEA;color:#8B1A1A}.p-meta{background:var(--ibg);color:var(--info)}.p-web{background:var(--pbg);color:var(--purple)}.p-ref{background:var(--wbg);color:var(--warn)}.p-walk{background:var(--s2);color:var(--text2)}.p-email{background:var(--pkbg);color:var(--pink)}.p-tiktok{background:#FDEAEA;color:#6B0000}.p-event{background:#EAF4DE;color:#2E6010}.p-school{background:var(--ibg);color:#0A3D7A}
+.p-parent{background:var(--wbg);color:var(--warn)}.p-student{background:#EAF4DE;color:#2E6010}.p-corporate{background:var(--pbg);color:var(--purple)}
+.p-nc{background:var(--s2);color:var(--text2)}.p-ct{background:var(--ibg);color:var(--info)}.p-in{background:#EAF4DE;color:#2E6010}.p-ps{background:var(--wbg);color:var(--warn)}.p-cf{background:var(--sbg);color:var(--success)}.p-ng{background:var(--dbg);color:var(--danger)}.p-nr{background:var(--pkbg);color:var(--pink)}
+.p-smk{background:var(--ibg);color:var(--info)}.p-intl{background:#EAF4DE;color:#2E6010}.p-priv{background:var(--wbg);color:var(--warn)}.p-tech{background:var(--pkbg);color:var(--pink)}
+.dot{width:7px;height:7px;border-radius:50%;background:var(--cyan);display:inline-block}
+.abt{background:none;border:none;cursor:pointer;color:var(--text3);font-size:15px;padding:3px 4px;border-radius:5px;transition:all .1s}
+.abt:hover{color:var(--navy);background:var(--s2)}
+.sn{font-weight:600;font-size:12.5px;color:var(--text);line-height:1.3}
+.sm{font-size:10px;color:var(--text3);margin-top:1px}
+.stsel{font-size:11px;border:none;background:none;cursor:pointer;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:500;padding:0}
+.hw{display:flex;align-items:center;gap:5px}
+.hb{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;max-width:44px}
+.hf{height:4px;border-radius:2px}
+.form-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:18px;margin-bottom:18px;box-shadow:0 2px 10px rgba(10,22,40,.09);display:none}
+.form-card.open{display:block}
+.fg3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:9px;margin-bottom:9px}
+.fg2{display:grid;grid-template-columns:1fr 1fr;gap:9px;margin-bottom:13px}
+.fl{font-size:10px;color:var(--text2);font-weight:700;margin-bottom:3px;text-transform:uppercase;letter-spacing:.05em}
+.fi{width:100%;padding:7px 9px;border:1px solid var(--border2);border-radius:6px;font-size:13px;font-family:'DM Sans',sans-serif;color:var(--text);background:var(--surface)}
+.fi:focus{outline:none;border-color:var(--cyan-d)}
+.chp{display:grid;grid-template-columns:repeat(5,1fr);gap:6px;margin-bottom:13px}
+.cho{border:1px solid var(--border2);border-radius:6px;padding:7px 4px;text-align:center;cursor:pointer;transition:all .15s;background:var(--surface)}
+.cho:hover{border-color:var(--cyan-d);background:#F0FDFB}
+.cho.sel{border-color:var(--cyan);background:#E0F8F4;border-width:2px}
+.cho i{font-size:17px;display:block;margin-bottom:2px}
+.cho span{font-size:10px;color:var(--text2);font-weight:500}
+.ch-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(290px,1fr));gap:13px}
+.ch-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:15px;box-shadow:var(--sh)}
+.ch-head{display:flex;align-items:center;gap:9px;margin-bottom:9px}
+.ch-ico{width:34px;height:34px;border-radius:8px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.ch-ico i{font-size:17px}
+.ch-name{font-size:13px;font-weight:600;color:var(--text)}
+.ch-cnt{font-size:11px;color:var(--text3)}
+.ch-desc{font-size:12px;color:var(--text2);line-height:1.5;margin-bottom:9px}
+.ch-tips{display:flex;flex-wrap:wrap;gap:5px}
+.tip{font-size:10px;padding:2px 8px;background:var(--s2);border-radius:20px;color:var(--text2)}
+.resp-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:15px;margin-bottom:11px;box-shadow:var(--sh)}
+.resp-meta{display:flex;align-items:center;gap:6px;flex-wrap:wrap;margin-bottom:7px}
+.resp-q{font-size:13px;font-weight:600;color:var(--text);margin-bottom:7px}
+.resp-body{font-size:12px;color:var(--text2);background:var(--s2);border-radius:6px;padding:9px 12px;line-height:1.7;white-space:pre-wrap;font-family:'DM Sans',sans-serif;margin-bottom:5px;border-left:3px solid var(--cyan)}
+.resp-tip{font-size:11px;color:var(--text3);font-style:italic}
+.obj-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px 15px;margin-bottom:9px;box-shadow:var(--sh)}
+.obj-q{font-size:13px;font-weight:600;color:var(--text);margin:7px 0;font-style:italic}
+.obj-a{font-size:13px;color:var(--text2);line-height:1.6}
+.tac-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:15px;margin-bottom:9px;display:flex;gap:13px;box-shadow:var(--sh)}
+.tac-ico{width:38px;height:38px;border-radius:9px;display:flex;align-items:center;justify-content:center;flex-shrink:0}
+.tac-name{font-size:13px;font-weight:600;color:var(--text);margin-bottom:3px}
+.tac-desc{font-size:12px;color:var(--text2);line-height:1.6;margin-bottom:3px}
+.tac-when{font-size:11px;color:var(--text3);font-style:italic}
+.fg-r{display:grid;grid-template-columns:repeat(auto-fit,minmax(155px,1fr));gap:11px;margin-bottom:18px}
+.fc{background:var(--navy);color:#fff;border-radius:var(--r);padding:15px}
+.fcl{font-size:10px;color:rgba(255,255,255,.45);margin-bottom:5px;text-transform:uppercase;letter-spacing:.05em}
+.fcv{font-family:'Space Mono',monospace;font-size:20px;font-weight:700;color:var(--cyan)}
+.fcs{font-size:10px;color:rgba(255,255,255,.35);margin-top:3px}
+.sl-grid{display:grid;grid-template-columns:1fr 1fr 1fr;gap:11px;margin-bottom:18px}
+.sl-card{background:var(--surface);border:1px solid var(--border);border-radius:var(--r);padding:13px}
+.sl-l{font-size:10px;color:var(--text3);text-transform:uppercase;letter-spacing:.05em;margin-bottom:6px}
+.sl-v{font-family:'Space Mono',monospace;font-size:15px;font-weight:700;color:var(--navy);margin-bottom:7px}
+input[type=range]{width:100%;accent-color:var(--cyan)}
+.bar-row{display:flex;align-items:center;gap:9px;margin-bottom:7px}
+.bar-lbl{font-size:12px;color:var(--text2);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.bar-bg{flex:1;height:6px;background:var(--border);border-radius:3px;overflow:hidden}
+.bar-fill{height:6px;border-radius:3px}
+.bar-n{font-size:12px;font-weight:600;min-width:18px;text-align:right}
+.bar-p{font-size:11px;color:var(--text3);min-width:30px;text-align:right}
+.fn-step{display:flex;align-items:center;gap:11px;padding:11px 14px;background:var(--surface);border:1px solid var(--border);border-radius:var(--r);margin-bottom:6px}
+.fn-num{font-family:'Space Mono',monospace;font-size:19px;font-weight:700;min-width:38px}
+.fn-lbl{font-size:13px;font-weight:600;color:var(--text)}
+.fn-pct{margin-left:auto;font-size:12px;font-weight:600;color:var(--text2)}
+.info-b{background:var(--ibg);border:1px solid #C0D5F0;border-radius:var(--r);padding:9px 13px;font-size:12px;color:var(--info);margin-bottom:13px;display:flex;align-items:flex-start;gap:7px}
+.info-b i{font-size:14px;flex-shrink:0;margin-top:1px}
+.gold-b{background:#FDF5E4;border:1px solid #E8D4A0;border-radius:var(--r);padding:9px 13px;font-size:12px;color:var(--gold);margin-bottom:13px;display:flex;align-items:flex-start;gap:7px}
+.sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
+.sec-t{font-size:14px;font-weight:600;color:var(--text)}
+@media(max-width:860px){.sidebar{width:54px}.sidebar .logo-mark,.sidebar .logo-sub,.sb-sec,.nav span,.sb-foot strong,.sb-foot p{display:none}.nav{justify-content:center;padding:9px}.content{padding:14px}.fg3{grid-template-columns:1fr 1fr}.sl-grid{grid-template-columns:1fr}}
+@media(max-width:580px){.kg{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr}.fg2{grid-template-columns:1fr}.ch-grid{grid-template-columns:1fr}.chp{grid-template-columns:repeat(3,1fr)}}
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+  <div class="sb-logo"><div class="logo-mark">cc/</div><div class="logo-sub">codencode Academy</div></div>
+  <div class="sb-sec">Enquiries</div>
+  <div class="nav active" onclick="sw('inbox',this)"><i class="ti ti-inbox"></i><span>Enquiry inbox</span><span class="nb r" id="nb-new">0</span></div>
+  <div class="nav" onclick="sw('channels',this)"><i class="ti ti-antenna"></i><span>Channels</span></div>
+  <div class="nav" onclick="sw('responses',this)"><i class="ti ti-message-circle"></i><span>Response templates</span></div>
+  <div class="nav" onclick="sw('funnel',this)"><i class="ti ti-filter"></i><span>Conversion funnel</span></div>
+  <div class="sb-sec">School outreach</div>
+  <div class="nav" onclick="sw('schools',this)"><i class="ti ti-building-community"></i><span>School pipeline</span><span class="nb" id="nb-sch">0</span></div>
+  <div class="nav" onclick="sw('objections',this)"><i class="ti ti-shield"></i><span>Objection playbook</span></div>
+  <div class="nav" onclick="sw('closing',this)"><i class="ti ti-trophy"></i><span>Closing tactics</span></div>
+  <div class="nav" onclick="sw('forecast',this)"><i class="ti ti-chart-bar"></i><span>Revenue forecast</span></div>
+  <div class="sb-foot"><strong>codencode Academy</strong><p>codencodemy@gmail.com</p><p>+60 113 165 2854</p></div>
+</aside>
+<div class="main">
+  <header class="topbar">
+    <div class="page-title" id="pgTitle">Enquiry inbox</div>
+    <div class="topbar-r">
+      <button class="btn btn-sm" onclick="exportData()"><i class="ti ti-download"></i> Export CSV</button>
+      <button class="btn btn-c btn-sm" onclick="toggleForm()"><i class="ti ti-plus"></i> Log enquiry</button>
+    </div>
+  </header>
+  <div class="content">
+    <div class="kg" id="kpi"></div>
+    <!-- INBOX -->
+    <div class="panel active" id="panel-inbox">
+      <div class="form-card" id="addForm">
+        <div style="font-size:14px;font-weight:600;margin-bottom:14px">Log new enquiry</div>
+        <div style="font-size:10px;color:var(--text2);font-weight:700;text-transform:uppercase;letter-spacing:.05em;margin-bottom:7px">Source channel</div>
+        <div class="chp" id="chp"></div>
+        <div class="fg3">
+          <div><div class="fl">Name</div><input class="fi" id="fi-name" placeholder="e.g. Puan Siti"></div>
+          <div><div class="fl">Phone / WhatsApp</div><input class="fi" id="fi-phone" placeholder="+601x-xxx xxxx"></div>
+          <div><div class="fl">Email</div><input class="fi" id="fi-email" placeholder="optional"></div>
+        </div>
+        <div class="fg3">
+          <div><div class="fl">Enquiry type</div><select class="fi" id="fi-type"><option>Parent</option><option>Student</option><option>School</option><option>Corporate</option></select></div>
+          <div><div class="fl">Course interest</div><select class="fi" id="fi-course"><option>Python Fundamentals</option><option>ML/AI for All</option><option>Vibe Coding</option><option>Data Analytics</option><option>Prompt Engineering</option><option>Web Dev</option><option>Not sure yet</option></select></div>
+          <div><div class="fl">Format</div><select class="fi" id="fi-format"><option>1-to-1</option><option>Small group (1-to-2)</option><option>Group (1-to-5)</option><option>Online Zoom</option><option>In-person</option><option>Not decided</option></select></div>
+        </div>
+        <div class="fg2">
+          <div><div class="fl">Message / summary</div><input class="fi" id="fi-msg" placeholder="What did they ask?"></div>
+          <div><div class="fl">Language</div><select class="fi" id="fi-lang"><option>English</option><option>Mandarin</option><option>Bahasa Melayu</option><option>Mixed</option></select></div>
+        </div>
+        <div style="display:flex;gap:7px">
+          <button class="btn btn-p btn-sm" onclick="addEnq()"><i class="ti ti-check"></i> Save</button>
+          <button class="btn btn-sm" onclick="toggleForm()">Cancel</button>
+        </div>
+      </div>
+      <div class="fb">
+        <div class="sw"><i class="ti ti-search"></i><input type="text" class="si" id="eq" placeholder="Search name, message..." oninput="renderInbox()"></div>
+        <select class="fsel" id="fsrc" onchange="renderInbox()"><option value="">All sources</option><option>WhatsApp</option><option>XHS (小红书)</option><option>Meta Ads</option><option>Website</option><option>Referral</option><option>Walk-in</option><option>Email</option><option>TikTok</option><option>School event</option><option>School outreach</option></select>
+        <select class="fsel" id="ftyp" onchange="renderInbox()"><option value="">All types</option><option>Parent</option><option>Student</option><option>School</option><option>Corporate</option></select>
+        <select class="fsel" id="fstg" onchange="renderInbox()"><option value="">All stages</option><option>New</option><option>Replied</option><option>Qualified</option><option>Converted</option><option>Nurture</option><option>Lost</option></select>
+        <select class="fsel" id="flng" onchange="renderInbox()"><option value="">All languages</option><option>English</option><option>Mandarin</option><option>Bahasa Melayu</option><option>Mixed</option></select>
+      </div>
+      <div class="tc"><div class="tw"><table>
+        <thead><tr><th style="width:26px"></th><th style="width:130px">Name</th><th style="width:110px">Source</th><th style="width:78px">Type</th><th style="width:120px">Course</th><th style="width:85px">Format</th><th style="width:72px">Language</th><th style="width:95px">Stage</th><th>Message</th><th style="width:66px">Date</th><th style="width:65px"></th></tr></thead>
+        <tbody id="ib"></tbody>
+      </table></div><div class="tf" id="ibf"></div></div>
+    </div>
+    <!-- CHANNELS -->
+    <div class="panel" id="panel-channels"><div class="ch-grid" id="chGrid"></div></div>
+    <!-- RESPONSES -->
+    <div class="panel" id="panel-responses"><div id="respList"></div></div>
+    <!-- FUNNEL -->
+    <div class="panel" id="panel-funnel">
+      <div class="sec-h"><div class="sec-t">Conversion funnel</div></div><div id="fnSteps" style="margin-bottom:22px"></div>
+      <div class="sec-h"><div class="sec-t">Enquiries by source</div></div><div id="srcBars" style="margin-bottom:22px"></div>
+      <div class="sec-h"><div class="sec-t">Enquiry type breakdown</div></div><div id="typBars"></div>
+    </div>
+    <!-- SCHOOLS -->
+    <div class="panel" id="panel-schools">
+      <div class="gold-b"><i class="ti ti-info-circle"></i>School outreach pipeline — B2B deals tracked separately. Update deal status inline.</div>
+      <div class="fb">
+        <div class="sw"><i class="ti ti-search"></i><input type="text" class="si" id="sq" placeholder="Search schools..." oninput="renderSchools()"></div>
+        <select class="fsel" id="fss" onchange="renderSchools()"><option value="">All states</option><option>Johor</option><option>Wilayah Persekutuan KL</option><option>Selangor</option><option>Negeri Sembilan</option><option>Putrajaya</option></select>
+        <select class="fsel" id="fsh" onchange="renderSchools()"><option value="">All heat</option><option>Hot</option><option>Warm</option><option>Cool</option><option>Cold</option></select>
+        <select class="fsel" id="fsc" onchange="renderSchools()"><option value="">All statuses</option><option>Not Contacted</option><option>Contacted</option><option>Interested</option><option>Proposal Sent</option><option>Confirmed</option><option>No Go</option><option>No Reach</option></select>
+      </div>
+      <div class="tc"><div class="tw"><table>
+        <thead><tr><th style="width:185px">School</th><th style="width:88px">Type</th><th style="width:105px">Status</th><th style="width:88px">Heat</th><th style="width:88px">Deal size</th><th style="width:110px">PIC</th><th style="width:90px">Source</th><th style="width:72px">Last contact</th><th style="width:78px">Next follow-up</th><th>Remarks</th></tr></thead>
+        <tbody id="sb"></tbody>
+      </table></div><div class="tf" id="sbf"></div></div>
+    </div>
+    <!-- OBJECTIONS -->
+    <div class="panel" id="panel-objections">
+      <div class="info-b"><i class="ti ti-shield"></i>Word-for-word responses to the 8 most common objections. Memorise these before every call.</div>
+      <div id="objList"></div>
+    </div>
+    <!-- CLOSING -->
+    <div class="panel" id="panel-closing">
+      <div class="info-b"><i class="ti ti-trophy"></i>8 closing tactics matched to pipeline stage and objection type.</div>
+      <div id="tacList"></div>
+    </div>
+    <!-- FORECAST -->
+    <div class="panel" id="panel-forecast">
+      <div class="sec-h"><div class="sec-t">Pipeline summary</div></div>
+      <div class="fg-r" id="fcTop"></div>
+      <div class="sec-h" style="margin-top:4px"><div class="sec-t">Deal stages</div></div>
+      <div id="stgChart" style="margin-bottom:22px"></div>
+      <div class="sec-h"><div class="sec-t">Revenue model</div></div>
+      <div class="sl-grid">
+        <div class="sl-card"><div class="sl-l">Avg students / workshop</div><div class="sl-v" id="oSz">60</div><input type="range" min="20" max="200" value="60" step="10" id="slSz" oninput="updFc()"></div>
+        <div class="sl-card"><div class="sl-l">Fee per student (RM)</div><div class="sl-v" id="oFee">RM 150</div><input type="range" min="50" max="500" value="150" step="10" id="slFee" oninput="updFc()"></div>
+        <div class="sl-card"><div class="sl-l">Schools closed / month</div><div class="sl-v" id="oCls">2</div><input type="range" min="1" max="10" value="2" step="1" id="slCls" oninput="updFc()"></div>
+      </div>
+      <div class="fg-r" id="fcModel"></div>
+    </div>
+  </div>
+</div>
+</div>
+<script>
+const SRCS=["WhatsApp","XHS (小红书)","Meta Ads","Website","Referral","Walk-in","Email","TikTok","School event","School outreach"];
+const SICO={"WhatsApp":"ti-brand-whatsapp","XHS (小红书)":"ti-brand-xiaohongshu","Meta Ads":"ti-brand-meta","Website":"ti-world","Referral":"ti-users","Walk-in":"ti-map-pin","Email":"ti-mail","TikTok":"ti-brand-tiktok","School event":"ti-calendar-event","School outreach":"ti-building-community"};
+const SCLS={"WhatsApp":"p-wa","XHS (小红书)":"p-xhs","Meta Ads":"p-meta","Website":"p-web","Referral":"p-ref","Walk-in":"p-walk","Email":"p-email","TikTok":"p-tiktok","School event":"p-event","School outreach":"p-school"};
+const SCLR={"WhatsApp":"#0A6E4A","XHS (小红书)":"#8B1A1A","Meta Ads":"#1254A0","Website":"#4A3BAA","Referral":"#8B5E10","Walk-in":"#5A6478","Email":"#8B2455","TikTok":"#6B0000","School event":"#2E6010","School outreach":"#0A3D7A"};
+const STGS=["New","Replied","Qualified","Converted","Nurture","Lost"];
+const SGCLS={"New":"p-new","Replied":"p-replied","Qualified":"p-qualified","Converted":"p-converted","Nurture":"p-nurture","Lost":"p-lost"};
+const SGCLR={"New":"#0D9E8A","Replied":"#1254A0","Qualified":"#2E6010","Converted":"#8B5E10","Nurture":"#4A3BAA","Lost":"#9AA3B0"};
+const TYCLS={"Parent":"p-parent","Student":"p-student","School":"p-school","Corporate":"p-corporate"};
+const HCLR={"Hot":"#A32020","Warm":"#8B5E10","Cool":"#1254A0","Cold":"#9AA3B0"};
+const HPCT={"Hot":90,"Warm":65,"Cool":35,"Cold":10};
+const SSCLS={"Not Contacted":"p-nc","Contacted":"p-ct","Interested":"p-in","Proposal Sent":"p-ps","Confirmed":"p-cf","No Go":"p-ng","No Reach":"p-nr","Qualified":"p-in"};
+const CSCLS={"SMK":"p-smk","International":"p-intl","Private School":"p-priv","Private / International":"p-priv","Technical School":"p-tech","Special Arts School":"p-tech"};
+const CSLBL={"SMK":"SMK","International":"Intl","Private School":"Private","Private / International":"Priv/Intl","Technical School":"Technical","Special Arts School":"Arts"};
+const SSTATS=["Not Contacted","Contacted","Interested","Proposal Sent","Confirmed","No Go","No Reach"];
+let selSrc="WhatsApp",eid=200;
+
+let enqs=[
+  {id:eid++,name:"Puan Farah bt Ismail",phone:"+6011-2345 6789",email:"",source:"WhatsApp",type:"Parent",course:"Python Fundamentals",format:"1-to-1",lang:"Bahasa Melayu",stage:"Qualified",msg:"Anak saya Form 3, boleh belajar Python tak? Berapa kos?",date:"2025-05-26",notes:"Hot lead. Quote sent."},
+  {id:eid++,name:"李美华 (Li Mei Hua)",phone:"+6016-987 6543",email:"limeih@gmail.com",source:"XHS (小红书)",type:"Parent",course:"ML/AI for All",format:"Online Zoom",lang:"Mandarin",stage:"Replied",msg:"看到小红书的帖子，想问下AI课程适合几岁？",date:"2025-05-25",notes:"13yr old daughter."},
+  {id:eid++,name:"Ahmad Faris",phone:"+6019-111 2233",email:"",source:"Meta Ads",type:"Student",course:"Vibe Coding",format:"Small group (1-to-2)",lang:"English",stage:"New",msg:"Saw your ad on Instagram. Is vibe coding good for beginners?",date:"2025-05-26",notes:""},
+  {id:eid++,name:"Ms Tan Siew Lin",phone:"+6012-334 5566",email:"silin@company.com",source:"Referral",type:"Corporate",course:"Python Fundamentals",format:"Group (1-to-5)",lang:"English",stage:"Qualified",msg:"Our HR team wants upskilling for 5 staff. Python basics.",date:"2025-05-24",notes:"Corporate. Budget available."},
+  {id:eid++,name:"Nurul Ain",phone:"+6013-456 7890",email:"",source:"Website",type:"Student",course:"Data Analytics",format:"Online Zoom",lang:"Mixed",stage:"Converted",msg:"Filled in contact form on codencode.my. When is next intake?",date:"2025-05-23",notes:"Enrolled May 2025."},
+  {id:eid++,name:"张伟杰 (Zhang Weijie)",phone:"+6017-222 3344",email:"",source:"XHS (小红书)",type:"Parent",course:"Python Fundamentals",format:"1-to-1",lang:"Mandarin",stage:"Qualified",msg:"我在小红书上看到，请问吉隆坡有实体课吗？",date:"2025-05-22",notes:"Prefers in-person KL."},
+  {id:eid++,name:"Priya Nair",phone:"+6018-555 6677",email:"priya@school.edu.my",source:"School event",type:"School",course:"ML/AI for All",format:"Group (1-to-5)",lang:"English",stage:"Replied",msg:"Met at STEM fair. Want trial workshop for 50 students.",date:"2025-05-21",notes:"Follow up with proposal."},
+  {id:eid++,name:"Encik Razif",phone:"+6011-888 9900",email:"",source:"Walk-in",type:"Parent",course:"Not sure yet",format:"Not decided",lang:"Bahasa Melayu",stage:"Replied",msg:"Datang pejabat tanya pasal kelas coding untuk anak darjah 6.",date:"2025-05-20",notes:"Suggested Vibe Coding."},
+  {id:eid++,name:"Chloe Lim",phone:"+6016-444 5566",email:"chloe@gmail.com",source:"TikTok",type:"Student",course:"Vibe Coding",format:"Online Zoom",lang:"English",stage:"New",msg:"Saw your TikTok lol. Is this for uni students?",date:"2025-05-26",notes:""},
+  {id:eid++,name:"Puan Rohani",phone:"+6013-777 8899",email:"",source:"WhatsApp",type:"Parent",course:"Python Fundamentals",format:"Small group (1-to-2)",lang:"Bahasa Melayu",stage:"Nurture",msg:"Minat tapi anak belum ready. Follow up bulan 7.",date:"2025-05-19",notes:"Re-engage July 2025."},
+  {id:eid++,name:"Daniel Wong",phone:"+6012-123 4567",email:"daniel.w@startup.io",source:"Email",type:"Corporate",course:"ML/AI for All",format:"Group (1-to-5)",lang:"English",stage:"Qualified",msg:"Looking to run AI literacy workshop for our dev team of 8.",date:"2025-05-18",notes:"Budget RM5k-8k."},
+  {id:eid++,name:"陈小明 (Chen Xiao Ming)",phone:"+6017-333 4455",email:"",source:"XHS (小红书)",type:"Parent",course:"ML/AI for All",format:"1-to-1",lang:"Mandarin",stage:"Lost",msg:"太贵了，先不考虑了。",date:"2025-05-15",notes:"Price objection."},
+  {id:eid++,name:"Sarah Krishnan",phone:"+6011-666 7788",email:"sarah.k@gmail.com",source:"Meta Ads",type:"Parent",course:"Python Fundamentals",format:"Online Zoom",lang:"English",stage:"Replied",msg:"My daughter is Form 5 — is it too late to start?",date:"2025-05-25",notes:""},
+  {id:eid++,name:"Ms Loh Yen Ping",phone:"+6019-234 5678",email:"",source:"School outreach",type:"School",course:"ML/AI for All",format:"Group (1-to-5)",lang:"English",stage:"Qualified",msg:"PK HEM from SMK Sri Tebrau. Interested in workshop for 40 students.",date:"2025-05-24",notes:"Proposal sent."},
+  {id:eid++,name:"Amirul Hakeem",phone:"+6018-999 0011",email:"",source:"Referral",type:"Student",course:"Vibe Coding",format:"Small group (1-to-2)",lang:"Mixed",stage:"Converted",msg:"Friend from codencode told me to join. Signing up for June batch.",date:"2025-05-23",notes:"Referral from Nurul Ain. Enrolled."},
+];
+
+let schools=[
+  {name:"Invictus International School JB",cat:"International",city:"Iskandar Puteri",state:"Johor",status:"Interested",heat:"Hot",pic:"Mr Aaron Chew",picRole:"Student Life Coord.",source:"School outreach",last:"2025-05-16",next:"2025-05-27",dealSize:12000,remarks:"Hot lead. Ready to sign."},
+  {name:"Fairview International School JB",cat:"International",city:"Johor Bahru",state:"Johor",status:"Proposal Sent",heat:"Hot",pic:"Ms Rachel Lim",picRole:"Head of Activities",source:"School outreach",last:"2025-05-14",next:"2025-05-26",dealSize:18000,remarks:"Comparing 2 providers. Send case study."},
+  {name:"Foon Yew High School JB",cat:"Private School",city:"Johor Bahru",state:"Johor",status:"Interested",heat:"Hot",pic:"Mr Tan Wei Liang",picRole:"Co-curriculum Head",source:"School outreach",last:"2025-05-10",next:"2025-05-27",dealSize:9000,remarks:"Demo class scheduled."},
+  {name:"ISKL",cat:"International",city:"Ampang Hilir",state:"Wilayah Persekutuan KL",status:"Proposal Sent",heat:"Hot",pic:"Ms Jennifer Tan",picRole:"MS/HS Events Lead",source:"School outreach",last:"2025-05-13",next:"2025-05-27",dealSize:30000,remarks:"MOU under review. Follow up this week."},
+  {name:"SMK Sri Tebrau",cat:"SMK",city:"Johor Bahru",state:"Johor",status:"Contacted",heat:"Warm",pic:"Pn Azura bt Razak",picRole:"PK HEM",source:"School outreach",last:"2025-05-12",next:"2025-05-30",dealSize:6000,remarks:"Needs principal approval."},
+  {name:"Sunway Intl School IP",cat:"International",city:"Iskandar Puteri",state:"Johor",status:"Contacted",heat:"Warm",pic:"Ms Priya Nair",picRole:"Admissions & Events",source:"School outreach",last:"2025-05-11",next:"2025-05-30",dealSize:15000,remarks:"Budget opens Q3."},
+  {name:"SMK Victoria",cat:"SMK",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"Contacted",heat:"Warm",pic:"Cikgu Hafiz Azman",picRole:"ICT Teacher",source:"School outreach",last:"2025-05-09",next:"2025-05-30",dealSize:4500,remarks:"ICT teacher is champion."},
+  {name:"Sri KL International",cat:"Private / International",city:"Subang Jaya",state:"Selangor",status:"Interested",heat:"Warm",pic:"Ms Christine Wong",picRole:"Secondary Principal",source:"School outreach",last:"2025-05-07",next:"2025-06-01",dealSize:22500,remarks:"Propose parent info session."},
+  {name:"UCSI International School KL",cat:"International",city:"Cheras",state:"Wilayah Persekutuan KL",status:"Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"2025-05-06",next:"2025-06-02",dealSize:0,remarks:"Emailed; awaiting reply."},
+  {name:"SMK Teknik Johor Bahru",cat:"Technical School",city:"Johor Bahru",state:"Johor",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-03",dealSize:0,remarks:"Technical school; priority outreach."},
+  {name:"SMK Sains JB",cat:"SMK",city:"Johor Bahru",state:"Johor",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-05",dealSize:0,remarks:"Science school — ideal audience."},
+  {name:"SMK Taman Tun Dr Ismail",cat:"SMK",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-06",dealSize:0,remarks:"TTDI area — affluent catchment."},
+  {name:"Marlborough College Malaysia",cat:"International",city:"Iskandar Puteri",state:"Johor",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"Gated admissions — try LinkedIn."},
+  {name:"Taylor's International School KL",cat:"International",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"Inquiry form only."},
+  {name:"Garden International School",cat:"International",city:"Mont Kiara",state:"Wilayah Persekutuan KL",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"Gated admissions."},
+  {name:"Priya Nair — SMK Sri Tebrau",cat:"SMK",city:"Johor Bahru",state:"Johor",status:"Interested",heat:"Warm",pic:"Priya Nair",picRole:"STEM Coord.",source:"School event",last:"2025-05-21",next:"2025-06-01",dealSize:7500,remarks:"Met at STEM fair. Proposal pending."},
+  {name:"SMK Methodist Boys KL",cat:"SMK",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-04",dealSize:0,remarks:"Mission school."},
+  {name:"Epsom College Malaysia",cat:"International",city:"Bandar Enstek",state:"Negeri Sembilan",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"No public contact."},
+  {name:"HELP International School",cat:"International",city:"Shah Alam",state:"Selangor",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-07",dealSize:0,remarks:"Ask student activities coord."},
+  {name:"Stellar International School",cat:"International",city:"Johor Bahru",state:"Johor",status:"Contacted",heat:"Warm",pic:"",picRole:"Admin",source:"School outreach",last:"2025-05-08",next:"2025-06-02",dealSize:0,remarks:"Email sent; awaiting reply."},
+];
+
+const CHANNELS=[
+  {src:"WhatsApp",icon:"ti-brand-whatsapp",desc:"Highest-volume channel. Most Malaysian parents prefer WhatsApp for fast casual enquiries. Reply within 30 minutes for best conversion.",tips:["Save number as a contact immediately","Use voice notes for complex replies","Don't spam; ask before sending brochure","Always end with a clear next step"]},
+  {src:"XHS (小红书)",icon:"ti-brand-xiaohongshu",desc:"Primary channel for Mandarin-speaking parents. Reply in Mandarin. Enquiries are research-stage.",tips:["Reply in Mandarin/simplified Chinese","Highlight the trilingual teaching angle","Share student project examples","Direct to WhatsApp for follow-up"]},
+  {src:"Meta Ads",icon:"ti-brand-meta",desc:"Paid traffic from Facebook/Instagram. May be lower intent. Qualify quickly to avoid wasted effort.",tips:["Ask which ad they saw to track ROI","Qualify in first message","If no reply in 24hr, one follow-up then Nurture","Best ads: student testimonials, project demos"]},
+  {src:"Website",icon:"ti-world",desc:"Enquiries via codencode.my contact form. Usually higher intent.",tips:["Auto-respond within 1 hour","Follow up by WhatsApp after form submission","Send clear pricing comparison","Add 'Book a free demo' CTA above the fold"]},
+  {src:"Referral",icon:"ti-users",desc:"Word-of-mouth from existing students or parents. Highest close rate of any channel.",tips:["Thank the referrer; consider a RM50 referral credit","Mention referrer in first message","Move quickly to proposal","Track who refers most and nurture that relationship"]},
+  {src:"Walk-in",icon:"ti-map-pin",desc:"In-person visitors. High-intent. Capture details immediately before they leave.",tips:["Have a QR code sign-in form ready","Send a WhatsApp within 1 hour of them leaving","Offer brochure and pricing on the spot","Log which event/area they came from"]},
+  {src:"Email",icon:"ti-mail",desc:"Typically from corporate clients or schools. Reply within same business day.",tips:["Reply with proper greeting and signature","Attach the relevant programme PDF","Follow up by WhatsApp if no reply in 48hr","Ask for decision maker early"]},
+  {src:"TikTok",icon:"ti-brand-tiktok",desc:"Younger audience (16-25). Informal tone. Quick to engage, quick to drop off.",tips:["Reply casually and fast","Use short sentences, no jargon","Ask age and level for recommendation","Convert to WhatsApp quickly"]},
+  {src:"School event",icon:"ti-calendar-event",desc:"Met at STEM fairs, career days, or education expos. Follow up within 24 hours.",tips:["Log contact details immediately with QR form","Reference the event in follow-up","Send company profile that same evening","Collect feedback cards at events"]},
+  {src:"School outreach",icon:"ti-building-community",desc:"Generated by your proactive school outreach calls or emails. Track as B2B leads.",tips:["Link back to school record in the pipeline","School is the client, not the parent","Send a formal proposal within 24 hours","Identify the decision maker early"]},
+];
+
+const RESPONSES=[
+  {src:"WhatsApp",type:"Parent",lang:"Bahasa Melayu",q:"First contact — fees and schedule",body:"Hai [Nama]! Terima kasih sebab hubungi codencode Academy\n\nKami ada kelas Python untuk pelajar semua peringkat, dari zero experience sampai advanced.\n\nHarga bermula dari:\n\u2022 1-to-1: RM199/jam\n\u2022 Small group (1-to-2): RM149/jam\n\u2022 Group (1-to-5): RM99/jam\n\nSemua kelas boleh dibuat online (Zoom) atau in-person di KL/JB.\n\nBoleh saya tanya dulu — anak tingkatan/darjah berapa, dan ada pengalaman coding tak?",tip:"Send within 30 min. Always end with a question."},
+  {src:"WhatsApp",type:"Parent",lang:"English",q:"First contact — general enquiry",body:"Hi [Name]! Thanks for reaching out to codencode Academy\n\nWe offer Python, AI, and Vibe Coding classes for students of all levels — no prior experience needed.\n\nQuick question: how old is your child, and what are they most interested in? (coding, AI, app building...)\n\nThat'll help me recommend the best course and format for them!",tip:"Short and conversational. Don't dump all info at once."},
+  {src:"XHS (小红书)",type:"Parent",lang:"Mandarin",q:"\u770b\u5e16\u540e\u6765\u95ee\u8bfe\u7a0b",body:"\u4f60\u597d [\u59d3\u540d]\uff01\u8c22\u8c22\u4f60\u5173\u6ce8codencode Academy\n\n\u6211\u4eec\u6709Python\u3001AI\u548cVibe Coding\u8bfe\u7a0b\uff0c\u9002\u5408\u5404\u5e74\u9f84\u5c42\u7684\u5b66\u751f\uff0c\u96f6\u57fa\u7840\u4e5f\u6ca1\u95ee\u9898\uff01\n\n\u8bfe\u7a0b\u683c\u5f0f\uff1a\n\u2022 1\u52741: RM199/\u5c0f\u65f6\n\u2022 1\u52742: RM149/\u5c0f\u65f6\n\u2022 \u5c0f\u7ec4\u73ed\uff081\u52745\uff09: RM99/\u5c0f\u65f6\n\n\u5168\u7a0b\u53ef\u4ee5\u7528\u534e\u8bed\u3001\u82f1\u8bed\u6216\u9a6c\u6765\u8bed\u6559\u5b66\uff01\n\n\u8bf7\u95ee\u4f60\u7684\u5b69\u5b50\u51e0\u5c81\uff1f\u6709\u6ca1\u6709\u5b66\u8fc7\u7f16\u7a0b\u5462\uff1f",tip:"Reply in Mandarin. Highlight trilingual teaching — key differentiator for XHS parents."},
+  {src:"Meta Ads",type:"Student",lang:"English",q:"Clicked ad — is it for beginners?",body:"Hi [Name]! Yes, 100% beginner-friendly\n\nNo coding experience needed at all. Our most popular beginner course is Python Fundamentals (6 weeks) — you'll go from zero to building your first real Python project.\n\nWe also have Vibe Coding if you're more into app building with AI — super visual and fun.\n\nAre you a student or working adult? I'll point you to the best option",tip:"Qualify their background first. Don't give pricing yet — build interest first."},
+  {src:"Referral",type:"Parent",lang:"English",q:"Referred by a friend or student",body:"Hi [Name]! [Referrer's name] mentioned you might be interested — so glad you reached out!\n\nWe teach Python, AI, and Vibe Coding in English, Mandarin, or BM — so the language is never a barrier.\n\nCan I ask — how old is your child, and what would they most enjoy: coding games, building apps, or learning AI?",tip:"Always name-drop the referrer early. It builds instant trust."},
+  {src:"Email",type:"Corporate",lang:"English",q:"Corporate training enquiry",body:"Dear [Name],\n\nThank you for your enquiry regarding corporate training at codencode Academy.\n\nWe offer customised Python and AI literacy workshops for teams of any size, from 2-hour awareness sessions to full-day hands-on programmes.\n\nFor a team of [X] staff, I'd recommend our Group Programme (RM99/pax/hour), tailored to your industry and skill level.\n\nI've attached our corporate programme brief. Could we schedule a 15-minute call this week?\n\nBest regards,\nSasha | codencode Academy\ncodencodemy@gmail.com | +60 113 165 2854",tip:"Attach programme PDF. Propose a call — corporate deals rarely close over email alone."},
+  {src:"Walk-in",type:"Parent",lang:"Bahasa Melayu",q:"Follow-up after walk-in visit",body:"Hai [Nama]! Sasha dari codencode Academy kat sini\n\nSeronok jumpa tadi! Macam yang kita borak, kami ada kelas coding dan AI yang sesuai.\n\nSaya dah sediakan brosur dan harga — boleh tengok di: codencode.my\n\nKalau ada soalan, WhatsApp saya terus! Nak book slot percubaan?",tip:"Send within 1 hour of them leaving. The walk-in is still warm — close quickly."},
+  {src:"TikTok",type:"Student",lang:"English",q:"DM after seeing a TikTok video",body:"Hey [Name]! Glad you found us\n\nYep that's us — we teach coding and AI in a way that actually makes sense (no boring theory!)\n\nWhat year/level are you in? I can tell you if we have something that fits\n\nAlso easier to chat on WhatsApp: +60 113 165 2854",tip:"Keep it casual. Convert to WhatsApp fast."},
+];
+
+const OBJS=[
+  {tag:"Budget",q:'"We don\'t have budget for this."',a:'Reframe as ROI: "Our workshops cost less per student than a school trip, and students leave with real skills. Can I share what similar schools paid and what they got?" Then offer a scaled-down pilot.',clr:"#FDF0D8",tc:"#8B5E10"},
+  {tag:"Timing",q:'"We\'re too busy now. Call us next term."',a:'Lock in a future date: "Of course — let me note to call you on [specific date]. Which week next term works — start or end?" Never hang up without a confirmed next date.',clr:"#E5EEFA",tc:"#1254A0"},
+  {tag:"Principal approval",q:'"I need to check with the principal first."',a:'"That makes sense. Would it help if I sent a 1-page brief you could forward? Or I can arrange a 10-minute call to answer questions directly." Offer a sample deck and reference letter.',clr:"#EAF4DE",tc:"#2E6010"},
+  {tag:"Comparing providers",q:'"We\'re looking at other providers too."',a:'"That\'s a great approach. What schools value most about codencode is our trilingual delivery, beginner-friendly curriculum, and real student projects. Would you like to see samples of student work?"',clr:"#EDEAFC",tc:"#4A3BAA"},
+  {tag:"Relevance",q:'"I\'m not sure our students are ready for AI."',a:'"That\'s exactly why we exist — our workshops assume zero prior knowledge. Students who\'ve never coded have built mini AI projects in a single day. Can I share a session outline?"',clr:"#E0F5EE",tc:"#0A6E4A"},
+  {tag:"Parent consent",q:'"Parents need to approve separately."',a:'"We\'re happy to run a free 30-minute parent info session — in-person or Zoom — so parents understand exactly what their children will learn. Schools that do this get much higher opt-in rates."',clr:"#FAEAF1",tc:"#8B2455"},
+  {tag:"No events",q:'"We don\'t have any events coming up."',a:'"We can slot into existing school time — even a 2-hour after-school session or a half-day. We\'ve also run holiday programs schools promoted as enrichment. Any free period in your schedule in the next 3 months?"',clr:"#FDEAEA",tc:"#A32020"},
+  {tag:"Send email",q:'"Just send us an email."',a:'"Sure! Just so I address it correctly — could I get your name, role, and best email? Also, is there a specific program I should reference so it doesn\'t get lost?" Follow up within 24 hours.',clr:"#F0F2F6",tc:"#5A6478"},
+];
+
+const TACS=[
+  {name:"Urgency close",icon:"ti-clock",bg:"#FDF0D8",ic:"#8B5E10",when:"Use when: school is warm/hot with confirmed PIC but stalling.",desc:"Mention your July/Aug schedule is filling up and you can only take limited partners per term. Offer a small incentive for booking before a date: e.g. one free add-on session."},
+  {name:"Trial class offer",icon:"ti-player-play",bg:"#E0F5EE",ic:"#0A6E4A",when:"Use when: school likes the concept but principal is hesitant.",desc:"Offer a free 1-hour taster session for 20-30 students at zero cost. Once students are excited, the PIC becomes your internal champion. Follow up within 48 hours."},
+  {name:"Social proof close",icon:"ti-star",bg:"#EAF4DE",ic:"#2E6010",when:"Use when: school is comparing you to another provider.",desc:"Share 2-3 testimonials from similar schools. Show student project samples. If another school in the same area has worked with you, name-drop it."},
+  {name:"Needs-based close",icon:"ti-heart",bg:"#EDEAFC",ic:"#4A3BAA",when:"Use when: PIC interested but hasn't escalated to decision maker.",desc:"Mirror what the PIC said they needed: 'You mentioned Form 4 students need career exposure — our AI career talk covers that in 2 hours. Can I send a 1-page brief for your principal?'"},
+  {name:"ROI close",icon:"ti-chart-bar",bg:"#E5EEFA",ic:"#1254A0",when:"Use when: school has budget hesitation or needs to justify to management.",desc:"Present cost-per-student: 60 students x RM150 = RM9,000 total, less than RM160/student — comparable to a field trip but with tangible skill outcome."},
+  {name:"Executive sponsor",icon:"ti-crown",bg:"#FDEAEA",ic:"#A32020",when:"Use when: gated admissions or PIC keeps redirecting; need top-down approach.",desc:"Identify and approach the school owner or board member via LinkedIn or a mutual referral. Frame it as a community initiative (AI literacy for youth)."},
+  {name:"Free pilot",icon:"ti-gift",bg:"#F0F2F6",ic:"#5A6478",when:"Use when: school is very large (200+ students) or a flagship target.",desc:"Offer one fully-free pilot workshop. Document it with photos, feedback forms, and student testimonials. Return with a paid proposal for the next cohort."},
+  {name:"Parent channel close",icon:"ti-users",bg:"#FAEAF1",ic:"#8B2455",when:"Use when: school admin is neutral but parent demand could create pull.",desc:"Ask the PIC if you can present at the next PIBG meeting or send info through the school parent WhatsApp group. If 10+ parents request it, the school feels compelled to organise it."},
+];
+
+function pill(cls,ico,lbl){return `<span class="pill ${cls}">${ico?`<i class="ti ${ico}"></i>`:''}${lbl}</span>`;}
+function spill(s){return pill(SCLS[s]||'p-walk',SICO[s]||'ti-message',s);}
+function tpill(t){return pill(TYCLS[t]||'p-parent','',t);}
+function cpill(c){return pill(CSCLS[c]||'p-priv','',CSLBL[c]||c);}
+function stpill(s){return pill(SSCLS[s]||'p-nc','',s);}
+function heatH(h){const pct=HPCT[h]||10,clr=HCLR[h]||'#9AA3B0';return `<div class="hw"><div class="hb"><div class="hf" style="width:${pct}%;background:${clr}"></div></div><span style="font-size:11px;font-weight:600;color:${clr}">${h}</span></div>`;}
+function fd(d){return d?d.replace('2025-',''):'—';}
+function rm(n){return n?'RM '+n.toLocaleString():'—';}
+function odClr(d){return d&&d<='2025-05-28'?'color:#A32020;font-weight:600':'color:#9AA3B0';}
+
+function renderKPI(){
+  const tot=enqs.length,nw=enqs.filter(e=>e.stage==='New').length,ql=enqs.filter(e=>e.stage==='Qualified').length,cv=enqs.filter(e=>e.stage==='Converted').length,rate=tot?Math.round(cv/tot*100):0;
+  const pv=schools.filter(s=>['Interested','Proposal Sent'].includes(s.status)).reduce((a,s)=>a+s.dealSize,0);
+  const od=schools.filter(s=>s.next&&s.next<='2025-05-28'&&!['Confirmed','No Go','No Reach'].includes(s.status)).length;
+  document.getElementById('kpi').innerHTML=`
+    <div class="kc"><div class="kl">Total enquiries</div><div class="kv c">${tot}</div><div class="ks">all channels</div><div class="ac" style="background:var(--cyan)"></div></div>
+    <div class="kc"><div class="kl">New — unactioned</div><div class="kv r">${nw}</div><div class="ks">reply now</div><div class="ac" style="background:var(--danger)"></div></div>
+    <div class="kc"><div class="kl">Qualified leads</div><div class="kv a">${ql}</div><div class="ks">hot pipeline</div><div class="ac" style="background:var(--gold)"></div></div>
+    <div class="kc"><div class="kl">Converted</div><div class="kv g">${cv}</div><div class="ks">${rate}% conversion rate</div><div class="ac" style="background:var(--success)"></div></div>
+    <div class="kc"><div class="kl">School pipeline</div><div class="kv" style="font-size:17px">RM ${Math.round(pv/1000)}k</div><div class="ks">interested + proposal</div><div class="ac" style="background:var(--gold)"></div></div>
+    <div class="kc"><div class="kl">Overdue follow-ups</div><div class="kv r">${od}</div><div class="ks">schools need action</div><div class="ac" style="background:var(--danger)"></div></div>`;
+  document.getElementById('nb-new').textContent=nw;
+  document.getElementById('nb-sch').textContent=schools.filter(s=>['Hot','Warm'].includes(s.heat)).length;
+}
+
+function getFilt(){
+  const q=(document.getElementById('eq').value||'').toLowerCase(),fs=document.getElementById('fsrc').value,ft=document.getElementById('ftyp').value,fg=document.getElementById('fstg').value,fl=document.getElementById('flng').value;
+  return enqs.filter(e=>{
+    if(q&&!e.name.toLowerCase().includes(q)&&!e.msg.toLowerCase().includes(q))return false;
+    if(fs&&e.source!==fs)return false;if(ft&&e.type!==ft)return false;if(fg&&e.stage!==fg)return false;if(fl&&e.lang!==fl)return false;return true;
+  });
+}
+
+function renderInbox(){
+  const f=getFilt();document.getElementById('ibf').textContent=`Showing ${f.length} of ${enqs.length} enquiries`;
+  const tb=document.getElementById('ib');
+  if(!f.length){tb.innerHTML=`<tr><td colspan="11" style="text-align:center;padding:22px;color:var(--text3)">No enquiries match filters.</td></tr>`;return;}
+  tb.innerHTML=f.map(e=>{const i=enqs.indexOf(e);return `<tr>
+    <td style="padding:9px 7px;text-align:center">${e.stage==='New'?'<span class="dot"></span>':''}</td>
+    <td><div class="sn">${e.name}</div><div class="sm">${e.phone}</div></td>
+    <td>${spill(e.source)}</td><td>${tpill(e.type)}</td>
+    <td style="font-size:12px;color:var(--text2)">${e.course}</td>
+    <td style="font-size:12px;color:var(--text2)">${e.format.replace('Small group (','(')}</td>
+    <td style="font-size:12px;color:var(--text2)">${e.lang}</td>
+    <td><select class="stsel" onchange="updStg(${i},this.value)">${STGS.map(s=>`<option${e.stage===s?' selected':''}>${s}</option>`).join('')}</select></td>
+    <td style="font-size:12px;color:var(--text2);line-height:1.4">${e.msg.substring(0,50)}${e.msg.length>50?'…':''}</td>
+    <td style="font-size:11px;color:var(--text3)">${fd(e.date)}</td>
+    <td style="white-space:nowrap"><button class="abt" title="WhatsApp reply"><i class="ti ti-brand-whatsapp"></i></button><button class="abt" title="Email"><i class="ti ti-mail"></i></button></td>
+  </tr>`;}).join('');
+}
+function updStg(i,v){enqs[i].stage=v;renderKPI();renderInbox();}
+
+function toggleForm(){const f=document.getElementById('addForm');if(f.classList.toggle('open'))renderChP();}
+function renderChP(){document.getElementById('chp').innerHTML=SRCS.map(s=>`<div class="cho${selSrc===s?' sel':''}" onclick="selCh('${s}',this)"><i class="ti ${SICO[s]}" style="color:${SCLR[s]}"></i><span>${s}</span></div>`).join('');}
+function selCh(s,el){selSrc=s;document.querySelectorAll('.cho').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
+function addEnq(){
+  const nm=document.getElementById('fi-name').value.trim();
+  if(!nm){alert('Please enter a name.');return;}
+  enqs.unshift({id:eid++,name:nm,phone:document.getElementById('fi-phone').value.trim(),email:document.getElementById('fi-email').value.trim(),source:selSrc,type:document.getElementById('fi-type').value,course:document.getElementById('fi-course').value,format:document.getElementById('fi-format').value,lang:document.getElementById('fi-lang').value,stage:'New',msg:document.getElementById('fi-msg').value.trim(),date:new Date().toISOString().slice(0,10),notes:''});
+  document.getElementById('addForm').classList.remove('open');renderKPI();renderInbox();
+}
+
+function renderChannels(){document.getElementById('chGrid').innerHTML=CHANNELS.map(c=>`<div class="ch-card"><div class="ch-head"><div class="ch-ico" style="background:${SCLR[c.src]}22"><i class="ti ${c.icon}" style="color:${SCLR[c.src]}"></i></div><div><div class="ch-name">${c.src}</div><div class="ch-cnt">${enqs.filter(e=>e.source===c.src).length} enquiries logged</div></div></div><div class="ch-desc">${c.desc}</div><div class="ch-tips">${c.tips.map(t=>`<span class="tip">${t}</span>`).join('')}</div></div>`).join('');}
+function renderResponses(){document.getElementById('respList').innerHTML=RESPONSES.map(r=>`<div class="resp-card"><div class="resp-meta">${spill(r.src)}${tpill(r.type)}<span class="pill p-walk">${r.lang}</span></div><div class="resp-q">${r.q}</div><div class="resp-body">${r.body}</div><div class="resp-tip"><i class="ti ti-info-circle" style="font-size:12px;vertical-align:-1px;margin-right:4px"></i>${r.tip}</div></div>`).join('');}
+
+function renderFunnel(){
+  const tot=enqs.length;
+  document.getElementById('fnSteps').innerHTML=STGS.map(st=>{const c=enqs.filter(e=>e.stage===st).length,pct=tot?Math.round(c/tot*100):0;return `<div class="fn-step"><div class="fn-num" style="color:${SGCLR[st]}">${c}</div><div style="flex:1"><div class="fn-lbl">${st}</div><div style="height:5px;background:var(--border);border-radius:3px;margin-top:4px;overflow:hidden"><div style="height:5px;background:${SGCLR[st]};width:${pct}%;border-radius:3px"></div></div></div><div class="fn-pct">${pct}%</div></div>`;}).join('');
+  const sc=SRCS.map(s=>({s,c:enqs.filter(e=>e.source===s).length})).filter(x=>x.c>0).sort((a,b)=>b.c-a.c),mx=sc[0]?sc[0].c:1;
+  document.getElementById('srcBars').innerHTML=sc.map(x=>`<div class="bar-row"><div class="bar-lbl" style="width:120px">${x.s}</div><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(x.c/mx*100)}%;background:${SCLR[x.s]||'#888'}"></div></div><div class="bar-n">${x.c}</div><div class="bar-p">${Math.round(x.c/tot*100)}%</div></div>`).join('');
+  const typs=["Parent","Student","School","Corporate"],tclr={"Parent":"#8B5E10","Student":"#2E6010","School":"#1254A0","Corporate":"#4A3BAA"},tc=typs.map(t=>({t,c:enqs.filter(e=>e.type===t).length})),mt=Math.max(...tc.map(x=>x.c),1);
+  document.getElementById('typBars').innerHTML=tc.map(x=>`<div class="bar-row"><div class="bar-lbl" style="width:120px">${x.t}</div><div class="bar-bg"><div class="bar-fill" style="width:${Math.round(x.c/mt*100)}%;background:${tclr[x.t]}"></div></div><div class="bar-n">${x.c}</div><div class="bar-p">${Math.round(x.c/tot*100)}%</div></div>`).join('');
+}
+
+function getSFilt(){
+  const q=(document.getElementById('sq').value||'').toLowerCase(),fs=document.getElementById('fss').value,fh=document.getElementById('fsh').value,fc=document.getElementById('fsc').value;
+  return schools.filter(s=>{if(q&&!s.name.toLowerCase().includes(q)&&!s.city.toLowerCase().includes(q))return false;if(fs&&s.state!==fs)return false;if(fh&&s.heat!==fh)return false;if(fc&&s.status!==fc)return false;return true;});
+}
+function renderSchools(){
+  const f=getSFilt();document.getElementById('sbf').textContent=`Showing ${f.length} of ${schools.length} schools`;
+  const tb=document.getElementById('sb');
+  if(!f.length){tb.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:22px;color:var(--text3)">No schools match filters.</td></tr>`;return;}
+  tb.innerHTML=f.map(s=>{const i=schools.indexOf(s);return `<tr>
+    <td><div class="sn">${s.name}</div><div class="sm">${s.city} · ${s.state.replace('Wilayah Persekutuan ','WP ')}</div></td>
+    <td>${cpill(s.cat)}</td>
+    <td><select class="stsel" onchange="updSch(${i},this.value)">${SSTATS.map(st=>`<option${s.status===st?' selected':''}>${st}</option>`).join('')}</select></td>
+    <td>${heatH(s.heat)}</td>
+    <td style="font-size:12px;font-weight:600;color:${s.dealSize?'#0A6E4A':'var(--text3)'}">${rm(s.dealSize)}</td>
+    <td style="font-size:12px"><div style="font-weight:500">${s.pic||'—'}</div><div style="font-size:10px;color:var(--text3)">${s.picRole||''}</div></td>
+    <td>${spill(s.source)}</td>
+    <td style="font-size:11px;color:var(--text3)">${fd(s.last)}</td>
+    <td style="font-size:11px;${odClr(s.next)}">${fd(s.next)}</td>
+    <td style="font-size:12px;color:var(--text2);line-height:1.4">${s.remarks||'—'}</td>
+  </tr>`;}).join('');
+}
+function updSch(i,v){schools[i].status=v;renderKPI();renderSchools();}
+
+function renderObj(){document.getElementById('objList').innerHTML=OBJS.map(o=>`<div class="obj-card"><span class="pill" style="background:${o.clr};color:${o.tc}">${o.tag}</span><div class="obj-q">${o.q}</div><div class="obj-a">${o.a}</div></div>`).join('');}
+function renderTac(){document.getElementById('tacList').innerHTML=TACS.map(t=>`<div class="tac-card"><div class="tac-ico" style="background:${t.bg}"><i class="ti ${t.icon}" style="color:${t.ic};font-size:18px"></i></div><div style="flex:1"><div class="tac-name">${t.name}</div><div class="tac-desc">${t.desc}</div><div class="tac-when">${t.when}</div></div></div>`).join('');}
+
+function renderForecast(){
+  const tv=schools.reduce((a,s)=>a+(s.dealSize||0),0),hv=schools.filter(s=>s.heat==='Hot').reduce((a,s)=>a+(s.dealSize||0),0),cv=schools.filter(s=>s.status==='Confirmed').reduce((a,s)=>a+(s.dealSize||0),0);
+  document.getElementById('fcTop').innerHTML=`<div class="fc"><div class="fcl">Total pipeline</div><div class="fcv">RM ${Math.round(tv/1000)}k</div><div class="fcs">all school deals</div></div><div class="fc"><div class="fcl">Hot leads value</div><div class="fcv" style="color:#E24B4A">RM ${Math.round(hv/1000)}k</div><div class="fcs">ready to close</div></div><div class="fc"><div class="fcl">Confirmed revenue</div><div class="fcv">RM ${Math.round(cv/1000)}k</div><div class="fcs">signed / confirmed</div></div>`;
+  const stgs=["Interested","Proposal Sent","Confirmed"],sc={"Interested":"#2E6010","Proposal Sent":"#8B5E10","Confirmed":"#0A6E4A"};
+  document.getElementById('stgChart').innerHTML=stgs.map(st=>{const cnt=schools.filter(s=>s.status===st).length,val=schools.filter(s=>s.status===st).reduce((a,s)=>a+(s.dealSize||0),0),pct=tv?Math.round(val/tv*100):0;return `<div class="bar-row" style="margin-bottom:9px"><div class="bar-lbl" style="width:130px">${st}</div><div class="bar-bg"><div class="bar-fill" style="width:${pct}%;background:${sc[st]}"></div></div><div class="bar-n" style="min-width:120px;text-align:right;font-size:12px">${cnt} school${cnt!==1?'s':''} · ${rm(val)}</div></div>`;}).join('');
+  updFc();
+}
+function updFc(){
+  const sz=parseInt(document.getElementById('slSz').value),fee=parseInt(document.getElementById('slFee').value),cls=parseInt(document.getElementById('slCls').value);
+  document.getElementById('oSz').textContent=sz;document.getElementById('oFee').textContent='RM '+fee;document.getElementById('oCls').textContent=cls+' school'+(cls>1?'s':'');
+  const pw=sz*fee,pm=pw*cls,p3=pm*3;
+  document.getElementById('fcModel').innerHTML=`<div class="fc"><div class="fcl">Per workshop</div><div class="fcv">RM ${pw.toLocaleString()}</div><div class="fcs">${sz} x RM ${fee}/student</div></div><div class="fc"><div class="fcl">Per month (${cls} school${cls>1?'s':''})</div><div class="fcv" style="color:#4ECFBF">RM ${pm.toLocaleString()}</div><div class="fcs">${cls} workshop${cls>1?'s':''}/month</div></div><div class="fc"><div class="fcl">Quarterly run rate</div><div class="fcv" style="color:#C9A84C">RM ${p3.toLocaleString()}</div><div class="fcs">3-month projection</div></div>`;
+}
+
+const PTITLES={inbox:"Enquiry inbox",channels:"Source channels",responses:"Response templates",funnel:"Conversion funnel",schools:"School pipeline",objections:"Objection playbook",closing:"Closing tactics",forecast:"Revenue forecast"};
+function sw(n,el){
+  document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));el.classList.add('active');
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+n).classList.add('active');
+  document.getElementById('pgTitle').textContent=PTITLES[n]||n;
+  if(n==='channels')renderChannels();if(n==='responses')renderResponses();if(n==='funnel')renderFunnel();
+  if(n==='schools')renderSchools();if(n==='objections')renderObj();if(n==='closing')renderTac();if(n==='forecast')renderForecast();
+}
+
+function exportData(){
+  const rows=[['ID','Name','Phone','Email','Source','Type','Course','Format','Language','Stage','Message','Date','Notes']];
+  enqs.forEach(e=>rows.push([e.id,e.name,e.phone,e.email,e.source,e.type,e.course,e.format,e.lang,e.stage,e.msg,e.date,e.notes]));
+  const csv=rows.map(r=>r.map(c=>'"'+(String(c||'')).replace(/"/g,'""')+'"').join(',')).join('\n');
+  const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='codencode_enquiries.csv';a.click();
+}
+
+renderKPI();renderInbox();
+</script>
+</body>
+</html>
