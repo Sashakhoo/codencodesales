@@ -25,6 +25,48 @@ const memory = {
   nextSchoolId: 1,
 };
 
+const demoEnquiryNames = [
+  "Puan Farah bt Ismail",
+  "李美华 (Li Mei Hua)",
+  "Ahmad Faris",
+  "Ms Tan Siew Lin",
+  "Nurul Ain",
+  "张伟杰 (Zhang Weijie)",
+  "Priya Nair",
+  "Encik Razif",
+  "Chloe Lim",
+  "Puan Rohani",
+  "Daniel Wong",
+  "陈小明 (Chen Xiao Ming)",
+  "Sarah Krishnan",
+  "Ms Loh Yen Ping",
+  "Amirul Hakeem",
+];
+
+const demoSchoolNames = [
+  "Invictus International School JB",
+  "Fairview International School JB",
+  "Foon Yew High School JB",
+  "ISKL",
+  "SMK Sri Tebrau",
+  "Sunway Intl School IP",
+  "SMK Victoria",
+  "Sri KL International",
+  "UCSI International School KL",
+  "SMK Teknik Johor Bahru",
+  "SMK Sains JB",
+  "SMK Taman Tun Dr Ismail",
+  "Marlborough College Malaysia",
+  "Taylor's International School KL",
+  "Garden International School",
+  "Priya Nair - SMK Sri Tebrau",
+  "Priya Nair — SMK Sri Tebrau",
+  "SMK Methodist Boys KL",
+  "Epsom College Malaysia",
+  "HELP International School",
+  "Stellar International School",
+];
+
 async function query(sql, params = []) {
   if (!pool) return null;
   return pool.query(sql, params);
@@ -76,6 +118,20 @@ async function initDb() {
       updated_at TIMESTAMPTZ DEFAULT NOW()
     )
   `);
+
+  await removeDemoRows();
+}
+
+async function removeDemoRows() {
+  const [enquiryResult, schoolResult] = await Promise.all([
+    query("DELETE FROM enquiries WHERE name = ANY($1::text[])", [demoEnquiryNames]),
+    query("DELETE FROM schools WHERE name = ANY($1::text[])", [demoSchoolNames]),
+  ]);
+
+  const removed = Number(enquiryResult.rowCount || 0) + Number(schoolResult.rowCount || 0);
+  if (removed > 0) {
+    console.log(`Removed ${removed} old demo CRM rows.`);
+  }
 }
 
 function toEnquiry(row) {
