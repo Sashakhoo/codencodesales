@@ -272,6 +272,44 @@ const CSCLS={"SMK":"p-smk","International":"p-intl","Private School":"p-priv","P
 const CSLBL={"SMK":"SMK","International":"Intl","Private School":"Private","Private / International":"Priv/Intl","Technical School":"Technical","Special Arts School":"Arts"};
 const SSTATS=["Not Contacted","Contacted","Interested","Proposal Sent","Confirmed","No Go","No Reach"];
 let selSrc="WhatsApp",eid=200;
+let apiReady=false;
+
+async function api(path,options={}){
+  const res=await fetch(path,{headers:{"Content-Type":"application/json"},...options});
+  if(!res.ok)throw new Error((await res.json().catch(()=>({error:"Request failed"}))).error||"Request failed");
+  return res.json();
+}
+
+async function seedIfEmpty(path,items){
+  const existing=await api(path);
+  if(existing.length)return existing;
+  const created=[];
+  for(const item of items){
+    created.push(await api(path,{method:"POST",body:JSON.stringify(item)}));
+  }
+  return created;
+}
+
+function renderCurrentView(){
+  renderKPI();renderInbox();
+  const active=document.querySelector('.panel.active')?.id?.replace('panel-','');
+  if(active==='channels')renderChannels();if(active==='responses')renderResponses();if(active==='funnel')renderFunnel();
+  if(active==='schools')renderSchools();if(active==='objections')renderObj();if(active==='closing')renderTac();if(active==='forecast')renderForecast();
+}
+
+async function loadData(){
+  const seedEnqs=[...enqs],seedSchools=[...schools];
+  try{
+    const [remoteEnqs,remoteSchools]=await Promise.all([
+      seedIfEmpty('/api/enquiries',seedEnqs),
+      seedIfEmpty('/api/schools',seedSchools)
+    ]);
+    enqs=remoteEnqs;schools=remoteSchools;apiReady=true;
+  }catch(err){
+    console.warn('Using browser-only data because API is unavailable:',err);
+  }
+  renderCurrentView();
+}
 
 let enqs=[
   {id:eid++,name:"Puan Farah bt Ismail",phone:"+6011-2345 6789",email:"",source:"WhatsApp",type:"Parent",course:"Python Fundamentals",format:"1-to-1",lang:"Bahasa Melayu",stage:"Qualified",msg:"Anak saya Form 3, boleh belajar Python tak? Berapa kos?",date:"2025-05-26",notes:"Hot lead. Quote sent."},
@@ -410,15 +448,27 @@ function renderInbox(){
     <td style="white-space:nowrap"><button class="abt" title="WhatsApp reply"><i class="ti ti-brand-whatsapp"></i></button><button class="abt" title="Email"><i class="ti ti-mail"></i></button></td>
   </tr>`;}).join('');
 }
-function updStg(i,v){enqs[i].stage=v;renderKPI();renderInbox();}
+async function updStg(i,v){
+  const old=enqs[i].stage;
+  enqs[i].stage=v;renderKPI();renderInbox();
+  if(!apiReady)return;
+  try{enqs[i]=await api(`/api/enquiries/${enqs[i].id}`,{method:"PATCH",body:JSON.stringify({stage:v})});}
+  catch(err){enqs[i].stage=old;renderKPI();renderInbox();alert('Could not save stage change. Please try again.');}
+}
 
 function toggleForm(){const f=document.getElementById('addForm');if(f.classList.toggle('open'))renderChP();}
 function renderChP(){document.getElementById('chp').innerHTML=SRCS.map(s=>`<div class="cho${selSrc===s?' sel':''}" onclick="selCh('${s}',this)"><i class="ti ${SICO[s]}" style="color:${SCLR[s]}"></i><span>${s}</span></div>`).join('');}
 function selCh(s,el){selSrc=s;document.querySelectorAll('.cho').forEach(c=>c.classList.remove('sel'));el.classList.add('sel');}
-function addEnq(){
+async function addEnq(){
   const nm=document.getElementById('fi-name').value.trim();
   if(!nm){alert('Please enter a name.');return;}
-  enqs.unshift({id:eid++,name:nm,phone:document.getElementById('fi-phone').value.trim(),email:document.getElementById('fi-email').value.trim(),source:selSrc,type:document.getElementById('fi-type').value,course:document.getElementById('fi-course').value,format:document.getElementById('fi-format').value,lang:document.getElementById('fi-lang').value,stage:'New',msg:document.getElementById('fi-msg').value.trim(),date:new Date().toISOString().slice(0,10),notes:''});
+  const item={id:eid++,name:nm,phone:document.getElementById('fi-phone').value.trim(),email:document.getElementById('fi-email').value.trim(),source:selSrc,type:document.getElementById('fi-type').value,course:document.getElementById('fi-course').value,format:document.getElementById('fi-format').value,lang:document.getElementById('fi-lang').value,stage:'New',msg:document.getElementById('fi-msg').value.trim(),date:new Date().toISOString().slice(0,10),notes:''};
+  if(apiReady){
+    try{enqs.unshift(await api('/api/enquiries',{method:"POST",body:JSON.stringify(item)}));}
+    catch(err){alert('Could not save enquiry. Please try again.');return;}
+  }else{
+    enqs.unshift(item);
+  }
   document.getElementById('addForm').classList.remove('open');renderKPI();renderInbox();
 }
 
@@ -455,7 +505,13 @@ function renderSchools(){
     <td style="font-size:12px;color:var(--text2);line-height:1.4">${s.remarks||'—'}</td>
   </tr>`;}).join('');
 }
-function updSch(i,v){schools[i].status=v;renderKPI();renderSchools();}
+async function updSch(i,v){
+  const old=schools[i].status;
+  schools[i].status=v;renderKPI();renderSchools();
+  if(!apiReady)return;
+  try{schools[i]=await api(`/api/schools/${schools[i].id}`,{method:"PATCH",body:JSON.stringify({status:v})});}
+  catch(err){schools[i].status=old;renderKPI();renderSchools();alert('Could not save school status. Please try again.');}
+}
 
 function renderObj(){document.getElementById('objList').innerHTML=OBJS.map(o=>`<div class="obj-card"><span class="pill" style="background:${o.clr};color:${o.tc}">${o.tag}</span><div class="obj-q">${o.q}</div><div class="obj-a">${o.a}</div></div>`).join('');}
 function renderTac(){document.getElementById('tacList').innerHTML=TACS.map(t=>`<div class="tac-card"><div class="tac-ico" style="background:${t.bg}"><i class="ti ${t.icon}" style="color:${t.ic};font-size:18px"></i></div><div style="flex:1"><div class="tac-name">${t.name}</div><div class="tac-desc">${t.desc}</div><div class="tac-when">${t.when}</div></div></div>`).join('');}
@@ -490,7 +546,7 @@ function exportData(){
   const a=document.createElement('a');a.href='data:text/csv;charset=utf-8,'+encodeURIComponent(csv);a.download='codencode_enquiries.csv';a.click();
 }
 
-renderKPI();renderInbox();
+loadData();
 </script>
 </body>
 </html>
