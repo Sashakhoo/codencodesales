@@ -5,7 +5,8 @@
   "type": "module",
   "scripts": {
     "start": "node server.js",
-    "dev": "node server.js"
+    "dev": "node server.js",
+    "import:schools": "node scripts/import-schools.js prospects_100_schools.csv"
   },
   "dependencies": {
     "express": "^4.19.2",

@@ -280,16 +280,6 @@ async function api(path,options={}){
   return res.json();
 }
 
-async function seedIfEmpty(path,items){
-  const existing=await api(path);
-  if(existing.length)return existing;
-  const created=[];
-  for(const item of items){
-    created.push(await api(path,{method:"POST",body:JSON.stringify(item)}));
-  }
-  return created;
-}
-
 function renderCurrentView(){
   renderKPI();renderInbox();
   const active=document.querySelector('.panel.active')?.id?.replace('panel-','');
@@ -298,11 +288,10 @@ function renderCurrentView(){
 }
 
 async function loadData(){
-  const seedEnqs=[...enqs],seedSchools=[...schools];
   try{
     const [remoteEnqs,remoteSchools]=await Promise.all([
-      seedIfEmpty('/api/enquiries',seedEnqs),
-      seedIfEmpty('/api/schools',seedSchools)
+      api('/api/enquiries'),
+      api('/api/schools')
     ]);
     enqs=remoteEnqs;schools=remoteSchools;apiReady=true;
   }catch(err){
@@ -311,46 +300,8 @@ async function loadData(){
   renderCurrentView();
 }
 
-let enqs=[
-  {id:eid++,name:"Puan Farah bt Ismail",phone:"+6011-2345 6789",email:"",source:"WhatsApp",type:"Parent",course:"Python Fundamentals",format:"1-to-1",lang:"Bahasa Melayu",stage:"Qualified",msg:"Anak saya Form 3, boleh belajar Python tak? Berapa kos?",date:"2025-05-26",notes:"Hot lead. Quote sent."},
-  {id:eid++,name:"李美华 (Li Mei Hua)",phone:"+6016-987 6543",email:"limeih@gmail.com",source:"XHS (小红书)",type:"Parent",course:"ML/AI for All",format:"Online Zoom",lang:"Mandarin",stage:"Replied",msg:"看到小红书的帖子，想问下AI课程适合几岁？",date:"2025-05-25",notes:"13yr old daughter."},
-  {id:eid++,name:"Ahmad Faris",phone:"+6019-111 2233",email:"",source:"Meta Ads",type:"Student",course:"Vibe Coding",format:"Small group (1-to-2)",lang:"English",stage:"New",msg:"Saw your ad on Instagram. Is vibe coding good for beginners?",date:"2025-05-26",notes:""},
-  {id:eid++,name:"Ms Tan Siew Lin",phone:"+6012-334 5566",email:"silin@company.com",source:"Referral",type:"Corporate",course:"Python Fundamentals",format:"Group (1-to-5)",lang:"English",stage:"Qualified",msg:"Our HR team wants upskilling for 5 staff. Python basics.",date:"2025-05-24",notes:"Corporate. Budget available."},
-  {id:eid++,name:"Nurul Ain",phone:"+6013-456 7890",email:"",source:"Website",type:"Student",course:"Data Analytics",format:"Online Zoom",lang:"Mixed",stage:"Converted",msg:"Filled in contact form on codencode.my. When is next intake?",date:"2025-05-23",notes:"Enrolled May 2025."},
-  {id:eid++,name:"张伟杰 (Zhang Weijie)",phone:"+6017-222 3344",email:"",source:"XHS (小红书)",type:"Parent",course:"Python Fundamentals",format:"1-to-1",lang:"Mandarin",stage:"Qualified",msg:"我在小红书上看到，请问吉隆坡有实体课吗？",date:"2025-05-22",notes:"Prefers in-person KL."},
-  {id:eid++,name:"Priya Nair",phone:"+6018-555 6677",email:"priya@school.edu.my",source:"School event",type:"School",course:"ML/AI for All",format:"Group (1-to-5)",lang:"English",stage:"Replied",msg:"Met at STEM fair. Want trial workshop for 50 students.",date:"2025-05-21",notes:"Follow up with proposal."},
-  {id:eid++,name:"Encik Razif",phone:"+6011-888 9900",email:"",source:"Walk-in",type:"Parent",course:"Not sure yet",format:"Not decided",lang:"Bahasa Melayu",stage:"Replied",msg:"Datang pejabat tanya pasal kelas coding untuk anak darjah 6.",date:"2025-05-20",notes:"Suggested Vibe Coding."},
-  {id:eid++,name:"Chloe Lim",phone:"+6016-444 5566",email:"chloe@gmail.com",source:"TikTok",type:"Student",course:"Vibe Coding",format:"Online Zoom",lang:"English",stage:"New",msg:"Saw your TikTok lol. Is this for uni students?",date:"2025-05-26",notes:""},
-  {id:eid++,name:"Puan Rohani",phone:"+6013-777 8899",email:"",source:"WhatsApp",type:"Parent",course:"Python Fundamentals",format:"Small group (1-to-2)",lang:"Bahasa Melayu",stage:"Nurture",msg:"Minat tapi anak belum ready. Follow up bulan 7.",date:"2025-05-19",notes:"Re-engage July 2025."},
-  {id:eid++,name:"Daniel Wong",phone:"+6012-123 4567",email:"daniel.w@startup.io",source:"Email",type:"Corporate",course:"ML/AI for All",format:"Group (1-to-5)",lang:"English",stage:"Qualified",msg:"Looking to run AI literacy workshop for our dev team of 8.",date:"2025-05-18",notes:"Budget RM5k-8k."},
-  {id:eid++,name:"陈小明 (Chen Xiao Ming)",phone:"+6017-333 4455",email:"",source:"XHS (小红书)",type:"Parent",course:"ML/AI for All",format:"1-to-1",lang:"Mandarin",stage:"Lost",msg:"太贵了，先不考虑了。",date:"2025-05-15",notes:"Price objection."},
-  {id:eid++,name:"Sarah Krishnan",phone:"+6011-666 7788",email:"sarah.k@gmail.com",source:"Meta Ads",type:"Parent",course:"Python Fundamentals",format:"Online Zoom",lang:"English",stage:"Replied",msg:"My daughter is Form 5 — is it too late to start?",date:"2025-05-25",notes:""},
-  {id:eid++,name:"Ms Loh Yen Ping",phone:"+6019-234 5678",email:"",source:"School outreach",type:"School",course:"ML/AI for All",format:"Group (1-to-5)",lang:"English",stage:"Qualified",msg:"PK HEM from SMK Sri Tebrau. Interested in workshop for 40 students.",date:"2025-05-24",notes:"Proposal sent."},
-  {id:eid++,name:"Amirul Hakeem",phone:"+6018-999 0011",email:"",source:"Referral",type:"Student",course:"Vibe Coding",format:"Small group (1-to-2)",lang:"Mixed",stage:"Converted",msg:"Friend from codencode told me to join. Signing up for June batch.",date:"2025-05-23",notes:"Referral from Nurul Ain. Enrolled."},
-];
-
-let schools=[
-  {name:"Invictus International School JB",cat:"International",city:"Iskandar Puteri",state:"Johor",status:"Interested",heat:"Hot",pic:"Mr Aaron Chew",picRole:"Student Life Coord.",source:"School outreach",last:"2025-05-16",next:"2025-05-27",dealSize:12000,remarks:"Hot lead. Ready to sign."},
-  {name:"Fairview International School JB",cat:"International",city:"Johor Bahru",state:"Johor",status:"Proposal Sent",heat:"Hot",pic:"Ms Rachel Lim",picRole:"Head of Activities",source:"School outreach",last:"2025-05-14",next:"2025-05-26",dealSize:18000,remarks:"Comparing 2 providers. Send case study."},
-  {name:"Foon Yew High School JB",cat:"Private School",city:"Johor Bahru",state:"Johor",status:"Interested",heat:"Hot",pic:"Mr Tan Wei Liang",picRole:"Co-curriculum Head",source:"School outreach",last:"2025-05-10",next:"2025-05-27",dealSize:9000,remarks:"Demo class scheduled."},
-  {name:"ISKL",cat:"International",city:"Ampang Hilir",state:"Wilayah Persekutuan KL",status:"Proposal Sent",heat:"Hot",pic:"Ms Jennifer Tan",picRole:"MS/HS Events Lead",source:"School outreach",last:"2025-05-13",next:"2025-05-27",dealSize:30000,remarks:"MOU under review. Follow up this week."},
-  {name:"SMK Sri Tebrau",cat:"SMK",city:"Johor Bahru",state:"Johor",status:"Contacted",heat:"Warm",pic:"Pn Azura bt Razak",picRole:"PK HEM",source:"School outreach",last:"2025-05-12",next:"2025-05-30",dealSize:6000,remarks:"Needs principal approval."},
-  {name:"Sunway Intl School IP",cat:"International",city:"Iskandar Puteri",state:"Johor",status:"Contacted",heat:"Warm",pic:"Ms Priya Nair",picRole:"Admissions & Events",source:"School outreach",last:"2025-05-11",next:"2025-05-30",dealSize:15000,remarks:"Budget opens Q3."},
-  {name:"SMK Victoria",cat:"SMK",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"Contacted",heat:"Warm",pic:"Cikgu Hafiz Azman",picRole:"ICT Teacher",source:"School outreach",last:"2025-05-09",next:"2025-05-30",dealSize:4500,remarks:"ICT teacher is champion."},
-  {name:"Sri KL International",cat:"Private / International",city:"Subang Jaya",state:"Selangor",status:"Interested",heat:"Warm",pic:"Ms Christine Wong",picRole:"Secondary Principal",source:"School outreach",last:"2025-05-07",next:"2025-06-01",dealSize:22500,remarks:"Propose parent info session."},
-  {name:"UCSI International School KL",cat:"International",city:"Cheras",state:"Wilayah Persekutuan KL",status:"Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"2025-05-06",next:"2025-06-02",dealSize:0,remarks:"Emailed; awaiting reply."},
-  {name:"SMK Teknik Johor Bahru",cat:"Technical School",city:"Johor Bahru",state:"Johor",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-03",dealSize:0,remarks:"Technical school; priority outreach."},
-  {name:"SMK Sains JB",cat:"SMK",city:"Johor Bahru",state:"Johor",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-05",dealSize:0,remarks:"Science school — ideal audience."},
-  {name:"SMK Taman Tun Dr Ismail",cat:"SMK",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-06",dealSize:0,remarks:"TTDI area — affluent catchment."},
-  {name:"Marlborough College Malaysia",cat:"International",city:"Iskandar Puteri",state:"Johor",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"Gated admissions — try LinkedIn."},
-  {name:"Taylor's International School KL",cat:"International",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"Inquiry form only."},
-  {name:"Garden International School",cat:"International",city:"Mont Kiara",state:"Wilayah Persekutuan KL",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"Gated admissions."},
-  {name:"Priya Nair — SMK Sri Tebrau",cat:"SMK",city:"Johor Bahru",state:"Johor",status:"Interested",heat:"Warm",pic:"Priya Nair",picRole:"STEM Coord.",source:"School event",last:"2025-05-21",next:"2025-06-01",dealSize:7500,remarks:"Met at STEM fair. Proposal pending."},
-  {name:"SMK Methodist Boys KL",cat:"SMK",city:"Kuala Lumpur",state:"Wilayah Persekutuan KL",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-04",dealSize:0,remarks:"Mission school."},
-  {name:"Epsom College Malaysia",cat:"International",city:"Bandar Enstek",state:"Negeri Sembilan",status:"No Reach",heat:"Cold",pic:"",picRole:"",source:"School outreach",last:"",next:"",dealSize:0,remarks:"No public contact."},
-  {name:"HELP International School",cat:"International",city:"Shah Alam",state:"Selangor",status:"Not Contacted",heat:"Cool",pic:"",picRole:"",source:"School outreach",last:"",next:"2025-06-07",dealSize:0,remarks:"Ask student activities coord."},
-  {name:"Stellar International School",cat:"International",city:"Johor Bahru",state:"Johor",status:"Contacted",heat:"Warm",pic:"",picRole:"Admin",source:"School outreach",last:"2025-05-08",next:"2025-06-02",dealSize:0,remarks:"Email sent; awaiting reply."},
-];
+let enqs=[];
+let schools=[];
 
 const CHANNELS=[
   {src:"WhatsApp",icon:"ti-brand-whatsapp",desc:"Highest-volume channel. Most Malaysian parents prefer WhatsApp for fast casual enquiries. Reply within 30 minutes for best conversion.",tips:["Save number as a contact immediately","Use voice notes for complex replies","Don't spam; ask before sending brochure","Always end with a clear next step"]},
