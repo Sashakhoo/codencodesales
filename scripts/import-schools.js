@@ -5,7 +5,7 @@ const { Pool } = pg;
 const file = process.argv[2];
 
 if (!file) {
-  console.error("Usage: node scripts/import-schools.js prospects_100_schools.csv");
+  console.error("Usage: node scripts/import-schools.js crm_school_pipeline_import.csv");
   process.exit(1);
 }
 
@@ -50,6 +50,8 @@ function parseCsv(text) {
 
 const [header, ...records] = parseCsv(fs.readFileSync(file, "utf8"));
 const index = Object.fromEntries(header.map((name, i) => [name, i]));
+const asInt = (value) => Number.parseInt(value || "0", 10) || 0;
+const asDate = (value) => value || null;
 const pool = new Pool({
   connectionString: process.env.DATABASE_URL,
   ssl: process.env.NODE_ENV === "production" ? { rejectUnauthorized: false } : false,
@@ -86,14 +88,19 @@ for (const record of records) {
   const value = (name) => record[index[name]] || "";
   await pool.query(
     `INSERT INTO schools
-      (name, cat, city, state, status, heat, source, deal_size, remarks)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9)
+      (name, cat, city, state, status, heat, pic, pic_role, source, last_contact, next_follow_up, deal_size, remarks)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
      ON CONFLICT (name, city, state)
      DO UPDATE SET
       cat = EXCLUDED.cat,
       status = EXCLUDED.status,
       heat = EXCLUDED.heat,
+      pic = EXCLUDED.pic,
+      pic_role = EXCLUDED.pic_role,
       source = EXCLUDED.source,
+      last_contact = EXCLUDED.last_contact,
+      next_follow_up = EXCLUDED.next_follow_up,
+      deal_size = EXCLUDED.deal_size,
       remarks = EXCLUDED.remarks,
       updated_at = NOW()`,
     [
@@ -103,8 +110,12 @@ for (const record of records) {
       value("state"),
       value("status") || "Not Contacted",
       value("heat") || "Cool",
+      value("pic"),
+      value("pic_role"),
       value("source") || "Web crawl",
-      0,
+      asDate(value("last_contact")),
+      asDate(value("next_follow_up")),
+      asInt(value("deal_size")),
       [value("remarks"), value("phone") && `Phone: ${value("phone")}`, value("email") && `Email: ${value("email")}`]
         .filter(Boolean)
         .join(" | "),

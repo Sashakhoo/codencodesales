@@ -1,4 +1,5 @@
 import express from "express";
+import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
@@ -8,6 +9,7 @@ const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 const app = express();
 const port = process.env.PORT || 3000;
+const schoolImportFile = path.join(__dirname, "crm_school_pipeline_import.csv");
 
 app.use(express.json({ limit: "1mb" }));
 
@@ -75,6 +77,7 @@ async function query(sql, params = []) {
 async function initDb() {
   if (!pool) {
     console.warn("DATABASE_URL not set. API is using temporary in-memory storage.");
+    loadMemorySchools();
     return;
   }
 
@@ -119,7 +122,13 @@ async function initDb() {
     )
   `);
 
+  await query(`
+    CREATE UNIQUE INDEX IF NOT EXISTS schools_name_city_state_unique
+    ON schools (name, city, state)
+  `);
+
   await removeDemoRows();
+  await seedSchoolsFromImport();
 }
 
 async function removeDemoRows() {
@@ -169,6 +178,119 @@ function toSchool(row) {
     dealSize: row.deal_size || 0,
     remarks: row.remarks || "",
   };
+}
+
+function parseCsv(text) {
+  const rows = [];
+  let row = [];
+  let cell = "";
+  let quoted = false;
+
+  for (let i = 0; i < text.length; i += 1) {
+    const char = text[i];
+    const next = text[i + 1];
+
+    if (quoted && char === '"' && next === '"') {
+      cell += '"';
+      i += 1;
+    } else if (char === '"') {
+      quoted = !quoted;
+    } else if (!quoted && char === ",") {
+      row.push(cell);
+      cell = "";
+    } else if (!quoted && (char === "\n" || char === "\r")) {
+      if (char === "\r" && next === "\n") i += 1;
+      row.push(cell);
+      if (row.some(Boolean)) rows.push(row);
+      row = [];
+      cell = "";
+    } else {
+      cell += char;
+    }
+  }
+
+  row.push(cell);
+  if (row.some(Boolean)) rows.push(row);
+  return rows;
+}
+
+function readSchoolImport() {
+  if (!fs.existsSync(schoolImportFile)) return [];
+  const [header, ...records] = parseCsv(fs.readFileSync(schoolImportFile, "utf8"));
+  const index = Object.fromEntries(header.map((name, i) => [name, i]));
+  return records
+    .map((record) => {
+      const value = (name) => record[index[name]] || "";
+      return {
+        name: value("name").trim(),
+        cat: value("category"),
+        city: value("city"),
+        state: value("state"),
+        status: value("status") || "Not Contacted",
+        heat: value("heat") || "Cool",
+        pic: value("pic"),
+        picRole: value("pic_role"),
+        source: value("source") || "School outreach",
+        last: value("last_contact"),
+        next: value("next_follow_up"),
+        dealSize: Number.parseInt(value("deal_size") || "0", 10) || 0,
+        remarks: [
+          value("remarks"),
+          value("phone") && `Phone: ${value("phone")}`,
+          value("email") && `Email: ${value("email")}`,
+        ]
+          .filter(Boolean)
+          .join(" | "),
+      };
+    })
+    .filter((school) => school.name);
+}
+
+function loadMemorySchools() {
+  const schools = readSchoolImport();
+  memory.schools = schools.map((school, index) => ({ id: index + 1, ...school }));
+  memory.nextSchoolId = memory.schools.length + 1;
+  console.log(`Loaded ${memory.schools.length} schools into the CRM pipeline.`);
+}
+
+async function seedSchoolsFromImport() {
+  const schools = readSchoolImport();
+  for (const school of schools) {
+    await query(
+      `INSERT INTO schools
+        (name, cat, city, state, status, heat, pic, pic_role, source, last_contact, next_follow_up, deal_size, remarks)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+       ON CONFLICT (name, city, state)
+       DO UPDATE SET
+        cat = EXCLUDED.cat,
+        status = EXCLUDED.status,
+        heat = EXCLUDED.heat,
+        pic = EXCLUDED.pic,
+        pic_role = EXCLUDED.pic_role,
+        source = EXCLUDED.source,
+        last_contact = EXCLUDED.last_contact,
+        next_follow_up = EXCLUDED.next_follow_up,
+        deal_size = EXCLUDED.deal_size,
+        remarks = EXCLUDED.remarks,
+        updated_at = NOW()`,
+      [
+        school.name,
+        school.cat,
+        school.city,
+        school.state,
+        school.status,
+        school.heat,
+        school.pic,
+        school.picRole,
+        school.source,
+        school.last || null,
+        school.next || null,
+        school.dealSize,
+        school.remarks,
+      ],
+    );
+  }
+  console.log(`Synced ${schools.length} schools into the CRM pipeline.`);
 }
 
 app.get("/health", (_req, res) => {

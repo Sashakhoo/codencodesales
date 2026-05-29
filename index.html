@@ -13,9 +13,11 @@
 body{font-family:'DM Sans',sans-serif;background:var(--bg);color:var(--text);font-size:14px;min-height:100vh}
 .layout{display:flex;min-height:100vh}
 .sidebar{width:220px;background:var(--navy);flex-shrink:0;display:flex;flex-direction:column;position:sticky;top:0;height:100vh;overflow-y:auto}
-.sb-logo{padding:18px 18px 14px;border-bottom:1px solid rgba(255,255,255,.07)}
-.logo-mark{font-family:'Space Mono',monospace;font-size:17px;font-weight:700;color:var(--cyan);letter-spacing:-1px}
-.logo-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:2px;text-transform:uppercase;letter-spacing:.07em}
+.sb-logo{padding:14px 14px 13px;border-bottom:1px solid rgba(255,255,255,.07)}
+.logo-mark{display:inline-flex;align-items:baseline;padding:7px 10px;border-radius:8px;background:#F4FAF8;font-family:'DM Sans',sans-serif;font-size:22px;font-weight:800;line-height:1;letter-spacing:0}
+.logo-mark .logo-dark{color:#10201F}
+.logo-mark .logo-green{color:#13A673}
+.logo-sub{font-size:10px;color:rgba(255,255,255,.35);margin-top:7px;text-transform:uppercase;letter-spacing:.07em}
 .sb-sec{padding:14px 14px 5px;font-size:10px;color:rgba(255,255,255,.28);text-transform:uppercase;letter-spacing:.09em;font-weight:600}
 .nav{display:flex;align-items:center;gap:9px;padding:8px 13px;margin:2px 7px;border-radius:6px;cursor:pointer;color:rgba(255,255,255,.5);font-size:13px;transition:all .15s}
 .nav:hover{background:rgba(255,255,255,.06);color:rgba(255,255,255,.85)}
@@ -145,7 +147,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
 <body>
 <div class="layout">
 <aside class="sidebar">
-  <div class="sb-logo"><div class="logo-mark">cc/</div><div class="logo-sub">codencode Academy</div></div>
+  <div class="sb-logo"><div class="logo-mark"><span class="logo-dark">coden</span><span class="logo-green">code</span><span class="logo-dark">.my</span></div><div class="logo-sub">codencode Academy</div></div>
   <div class="sb-sec">Enquiries</div>
   <div class="nav active" onclick="sw('inbox',this)"><i class="ti ti-inbox"></i><span>Enquiry inbox</span><span class="nb r" id="nb-new">0</span></div>
   <div class="nav" onclick="sw('channels',this)"><i class="ti ti-antenna"></i><span>Channels</span></div>
@@ -336,6 +338,10 @@ const OBJS=[
   {tag:"Parent consent",q:'"Parents need to approve separately."',a:'"We\'re happy to run a free 30-minute parent info session — in-person or Zoom — so parents understand exactly what their children will learn. Schools that do this get much higher opt-in rates."',clr:"#FAEAF1",tc:"#8B2455"},
   {tag:"No events",q:'"We don\'t have any events coming up."',a:'"We can slot into existing school time — even a 2-hour after-school session or a half-day. We\'ve also run holiday programs schools promoted as enrichment. Any free period in your schedule in the next 3 months?"',clr:"#FDEAEA",tc:"#A32020"},
   {tag:"Send email",q:'"Just send us an email."',a:'"Sure! Just so I address it correctly — could I get your name, role, and best email? Also, is there a specific program I should reference so it doesn\'t get lost?" Follow up within 24 hours.',clr:"#F0F2F6",tc:"#5A6478"},
+  {tag:"Child suitability",q:'"Is this suitable for my child?"',a:'"Yes, definitely. Our Python for Beginners course is designed for ages 13+ with zero prior experience. Max 5 students per class, pace set by the group, trilingual teaching, and real projects each week. Want me to send a Week 1 sample slide?"',clr:"#EAF4DE",tc:"#2E6010"},
+  {tag:"Adult suitability",q:'"I\'m an adult. Is this for me?"',a:'"100% yes. We have students from 13 to 35, and adults often progress faster because the motivation is clearer. Python helps with data analysis, automation, career switching, and personal projects. Want me to send the full syllabus?"',clr:"#EDEAFC",tc:"#4A3BAA"},
+  {tag:"Too expensive",q:'"Mahal la / It is too expensive."',a:'"I understand. RM750 over 6 weeks is RM125 per week, less than many private tuition hours in JB, and includes 2 hours of class plus weekly WhatsApp support. If you want to try first, we can book a free 1-hour intro class."',clr:"#FDF0D8",tc:"#8B5E10"},
+  {tag:"Zero experience",q:'"I/my child knows nothing about coding."',a:'"That is exactly who the beginner course is built for. We start from absolute zero, handle setup together in the first session, and build toward a complete app by Week 6. Want to try a free 1-hour intro class first?"',clr:"#E0F5EE",tc:"#0A6E4A"},
 ];
 
 const TACS=[
@@ -347,6 +353,11 @@ const TACS=[
   {name:"Executive sponsor",icon:"ti-crown",bg:"#FDEAEA",ic:"#A32020",when:"Use when: gated admissions or PIC keeps redirecting; need top-down approach.",desc:"Identify and approach the school owner or board member via LinkedIn or a mutual referral. Frame it as a community initiative (AI literacy for youth)."},
   {name:"Free pilot",icon:"ti-gift",bg:"#F0F2F6",ic:"#5A6478",when:"Use when: school is very large (200+ students) or a flagship target.",desc:"Offer one fully-free pilot workshop. Document it with photos, feedback forms, and student testimonials. Return with a paid proposal for the next cohort."},
   {name:"Parent channel close",icon:"ti-users",bg:"#FAEAF1",ic:"#8B2455",when:"Use when: school admin is neutral but parent demand could create pull.",desc:"Ask the PIC if you can present at the next PIBG meeting or send info through the school parent WhatsApp group. If 10+ parents request it, the school feels compelled to organise it."},
+  {name:"Age + language qualifier",icon:"ti-message-question",bg:"#E5EEFA",ic:"#1254A0",when:"Use when: a parent opens with a general WhatsApp enquiry.",desc:"Ask two questions before sending details: child age and preferred language. Then send the right syllabus and pricing so the reply feels tailored, not generic."},
+  {name:"School partnership call",icon:"ti-building-community",bg:"#EAF4DE",ic:"#2E6010",when:"Use when: a teacher or admin asks about group class or partnership options.",desc:"Lead with Python/ML options, EN/Chinese/BM delivery, RM75/hour/student group rate with minimum 8 students, flexible venue, certificates, and all materials. Close by asking for a 15-minute call this week."},
+  {name:"3-day syllabus follow-up",icon:"ti-send",bg:"#FDF0D8",ic:"#8B5E10",when:"Use when: syllabus or pricing was sent and the chat has gone quiet for 3 days.",desc:"Send a light check-in: ask if they saw the syllabus, mention no pressure, note the cohort start date and remaining spots, then invite questions about price, schedule, or fit."},
+  {name:"Schedule reservation close",icon:"ti-calendar-time",bg:"#E0F5EE",ic:"#0A6E4A",when:"Use when: the lead asks about dates, timing, or availability.",desc:"Share the 2026 cohort dates, remind them each group is capped at 5 students, and ask directly: 'Want me to reserve a spot?'"},
+  {name:"Payment welcome close",icon:"ti-circle-check",bg:"#F0F2F6",ic:"#5A6478",when:"Use when: payment is confirmed.",desc:"Reply within 30 minutes. Confirm they are officially in, explain the WhatsApp class group, first class date/time, and that setup will be handled together on Day 1."},
 ];
 
 function pill(cls,ico,lbl){return `<span class="pill ${cls}">${ico?`<i class="ti ${ico}"></i>`:''}${lbl}</span>`;}
