@@ -68,6 +68,8 @@ await pool.query(`
     heat TEXT DEFAULT 'Cool',
     pic TEXT DEFAULT '',
     pic_role TEXT DEFAULT '',
+    phone TEXT DEFAULT '',
+    email TEXT DEFAULT '',
     source TEXT DEFAULT '',
     last_contact DATE,
     next_follow_up DATE,
@@ -77,6 +79,9 @@ await pool.query(`
     updated_at TIMESTAMPTZ DEFAULT NOW()
   )
 `);
+
+await pool.query("ALTER TABLE schools ADD COLUMN IF NOT EXISTS phone TEXT DEFAULT ''");
+await pool.query("ALTER TABLE schools ADD COLUMN IF NOT EXISTS email TEXT DEFAULT ''");
 
 await pool.query(`
   CREATE UNIQUE INDEX IF NOT EXISTS schools_name_city_state_unique
@@ -88,8 +93,8 @@ for (const record of records) {
   const value = (name) => record[index[name]] || "";
   await pool.query(
     `INSERT INTO schools
-      (name, cat, city, state, status, heat, pic, pic_role, source, last_contact, next_follow_up, deal_size, remarks)
-     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13)
+      (name, cat, city, state, status, heat, pic, pic_role, phone, email, source, last_contact, next_follow_up, deal_size, remarks)
+     VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14,$15)
      ON CONFLICT (name, city, state)
      DO UPDATE SET
       cat = EXCLUDED.cat,
@@ -97,6 +102,8 @@ for (const record of records) {
       heat = EXCLUDED.heat,
       pic = EXCLUDED.pic,
       pic_role = EXCLUDED.pic_role,
+      phone = EXCLUDED.phone,
+      email = EXCLUDED.email,
       source = EXCLUDED.source,
       last_contact = EXCLUDED.last_contact,
       next_follow_up = EXCLUDED.next_follow_up,
@@ -112,13 +119,13 @@ for (const record of records) {
       value("heat") || "Cool",
       value("pic"),
       value("pic_role"),
+      value("phone"),
+      value("email"),
       value("source") || "Web crawl",
       asDate(value("last_contact")),
       asDate(value("next_follow_up")),
       asInt(value("deal_size")),
-      [value("remarks"), value("phone") && `Phone: ${value("phone")}`, value("email") && `Email: ${value("email")}`]
-        .filter(Boolean)
-        .join(" | "),
+      value("remarks"),
     ],
   );
   imported += 1;

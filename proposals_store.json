@@ -1,0 +1,109 @@
+[
+  {
+    "id": 1,
+    "proposalId": "PROP-0001",
+    "proposalName": "AI Literacy Intro Talk",
+    "client": "",
+    "pic": "",
+    "category": "AI Workshop",
+    "topics": [
+      "Introduction to AI",
+      "AI Prompt Engineering"
+    ],
+    "audiences": [
+      "Upper Secondary",
+      "Teachers"
+    ],
+    "duration": "1 Hour Talk",
+    "price": 1200,
+    "status": "Ready",
+    "outcomes": [
+      "AI Literacy",
+      "Future Skills",
+      "Career Readiness"
+    ],
+    "followUpDate": "",
+    "proposalFile": "",
+    "remarks": "Base template for schools exploring AI awareness sessions."
+  },
+  {
+    "id": 2,
+    "proposalId": "PROP-0002",
+    "proposalName": "Python Fundamentals Bootcamp",
+    "client": "",
+    "pic": "",
+    "category": "Coding Workshop",
+    "topics": [
+      "Python Fundamentals"
+    ],
+    "audiences": [
+      "Lower Secondary",
+      "Upper Secondary"
+    ],
+    "duration": "Half Day",
+    "price": 3500,
+    "status": "Ready",
+    "outcomes": [
+      "Coding Fundamentals",
+      "Problem Solving",
+      "STEM"
+    ],
+    "followUpDate": "",
+    "proposalFile": "",
+    "remarks": "Reusable coding workshop proposal for school enrichment days."
+  },
+  {
+    "id": 3,
+    "proposalId": "PROP-0003",
+    "proposalName": "Teacher AI Enablement",
+    "client": "",
+    "pic": "",
+    "category": "Teacher Training",
+    "topics": [
+      "AI Prompt Engineering",
+      "AI Content Creation",
+      "AI for Workplace"
+    ],
+    "audiences": [
+      "Teachers"
+    ],
+    "duration": "Full Day",
+    "price": 6800,
+    "status": "Draft",
+    "outcomes": [
+      "AI Literacy",
+      "Digital Creativity",
+      "Future Skills"
+    ],
+    "followUpDate": "",
+    "proposalFile": "",
+    "remarks": "Teacher CPD style training package."
+  },
+  {
+    "id": 4,
+    "proposalId": "PROP-0004",
+    "proposalName": "Holiday App Builder Program",
+    "client": "",
+    "pic": "",
+    "category": "Holiday Program",
+    "topics": [
+      "App Development",
+      "Build a Website"
+    ],
+    "audiences": [
+      "Primary School",
+      "Lower Secondary"
+    ],
+    "duration": "4 Weeks",
+    "price": 7200,
+    "status": "Ready",
+    "outcomes": [
+      "Digital Creativity",
+      "Entrepreneurship",
+      "Coding Fundamentals"
+    ],
+    "followUpDate": "",
+    "proposalFile": "",
+    "remarks": "Clone for holiday camp or mall activation proposals."
+  }
+]

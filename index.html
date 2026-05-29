@@ -76,6 +76,10 @@ tr:hover td{background:#F8FAFD}
 .sn{font-weight:600;font-size:12.5px;color:var(--text);line-height:1.3}
 .sm{font-size:10px;color:var(--text3);margin-top:1px}
 .stsel{font-size:11px;border:none;background:none;cursor:pointer;color:var(--text);font-family:'DM Sans',sans-serif;font-weight:500;padding:0}
+.cell-input,.cell-area{width:100%;border:1px solid transparent;border-radius:6px;background:transparent;color:var(--text);font-family:'DM Sans',sans-serif;font-size:12px;padding:5px 6px;transition:all .15s}
+.cell-input:hover,.cell-area:hover,.cell-input:focus,.cell-area:focus{border-color:var(--border2);background:var(--surface);outline:none}
+.cell-input.num{text-align:right;font-weight:600;color:#0A6E4A}
+.cell-area{min-height:58px;resize:vertical;line-height:1.4;color:var(--text2)}
 .hw{display:flex;align-items:center;gap:5px}
 .hb{flex:1;height:4px;background:var(--border);border-radius:2px;overflow:hidden;max-width:44px}
 .hf{height:4px;border-radius:2px}
@@ -140,6 +144,28 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
 .gold-b{background:#FDF5E4;border:1px solid #E8D4A0;border-radius:var(--r);padding:9px 13px;font-size:12px;color:var(--gold);margin-bottom:13px;display:flex;align-items:flex-start;gap:7px}
 .sec-h{display:flex;align-items:center;justify-content:space-between;margin-bottom:12px}
 .sec-t{font-size:14px;font-weight:600;color:var(--text)}
+.view-tabs{display:inline-flex;border:1px solid var(--border2);border-radius:8px;overflow:hidden;background:var(--surface)}
+.view-tab{border:none;background:transparent;padding:7px 11px;font-size:12px;font-weight:600;color:var(--text2);cursor:pointer;font-family:'DM Sans',sans-serif}
+.view-tab.active{background:var(--navy);color:#fff}
+.prop-shell{display:flex;flex-direction:column;gap:13px}
+.prop-top{display:flex;justify-content:space-between;align-items:center;gap:12px;flex-wrap:wrap}
+.kanban{display:grid;grid-auto-flow:column;grid-auto-columns:minmax(235px,1fr);gap:12px;overflow-x:auto;padding-bottom:6px}
+.kb-col{background:#F9FAFC;border:1px solid var(--border);border-radius:var(--rl);min-height:360px}
+.kb-head{display:flex;justify-content:space-between;align-items:center;padding:11px 12px;border-bottom:1px solid var(--border);font-size:12px;font-weight:700;color:var(--text);text-transform:uppercase;letter-spacing:.04em}
+.kb-count{font-family:'Space Mono',monospace;color:var(--text3);font-size:11px}
+.kb-body{padding:9px;min-height:310px}
+.prop-card{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:11px;margin-bottom:9px;box-shadow:var(--sh);cursor:grab}
+.prop-card:active{cursor:grabbing}
+.prop-id{font-size:10px;color:var(--text3);font-family:'Space Mono',monospace;margin-bottom:4px}
+.prop-name{font-size:13px;font-weight:700;color:var(--text);line-height:1.25;margin-bottom:4px}
+.prop-client{font-size:11px;color:var(--text2);margin-bottom:8px}
+.prop-price{font-family:'Space Mono',monospace;font-size:13px;font-weight:700;color:var(--success);margin-bottom:8px}
+.tag-row{display:flex;gap:4px;flex-wrap:wrap}
+.tag{display:inline-flex;align-items:center;border-radius:20px;padding:2px 7px;font-size:10px;font-weight:600;background:var(--s2);color:var(--text2)}
+.tag.aud{background:#EAF4DE;color:#2E6010}.tag.stat{background:var(--ibg);color:var(--info)}.tag.due{background:var(--dbg);color:var(--danger)}
+.table-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
+.prop-actions{white-space:nowrap}
+.account-grid{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:12px}
 @media(max-width:860px){.sidebar{width:54px}.sidebar .logo-mark,.sidebar .logo-sub,.sb-sec,.nav span,.sb-foot strong,.sb-foot p{display:none}.nav{justify-content:center;padding:9px}.content{padding:14px}.fg3{grid-template-columns:1fr 1fr}.sl-grid{grid-template-columns:1fr}}
 @media(max-width:580px){.kg{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr}.fg2{grid-template-columns:1fr}.ch-grid{grid-template-columns:1fr}.chp{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -155,6 +181,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
   <div class="nav" onclick="sw('funnel',this)"><i class="ti ti-filter"></i><span>Conversion funnel</span></div>
   <div class="sb-sec">School outreach</div>
   <div class="nav" onclick="sw('schools',this)"><i class="ti ti-building-community"></i><span>School pipeline</span><span class="nb" id="nb-sch">0</span></div>
+  <div class="nav" onclick="sw('proposals',this)"><i class="ti ti-file-dollar"></i><span>Proposals</span><span class="nb" id="nb-prop">0</span></div>
   <div class="nav" onclick="sw('objections',this)"><i class="ti ti-shield"></i><span>Objection playbook</span></div>
   <div class="nav" onclick="sw('closing',this)"><i class="ti ti-trophy"></i><span>Closing tactics</span></div>
   <div class="nav" onclick="sw('forecast',this)"><i class="ti ti-chart-bar"></i><span>Revenue forecast</span></div>
@@ -219,17 +246,51 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
     </div>
     <!-- SCHOOLS -->
     <div class="panel" id="panel-schools">
-      <div class="gold-b"><i class="ti ti-info-circle"></i>School outreach pipeline — B2B deals tracked separately. Update deal status inline.</div>
+      <div class="gold-b"><i class="ti ti-info-circle"></i>School outreach pipeline — B2B deals tracked separately. Update status, contacts, feedback, heat, and deal size inline.</div>
       <div class="fb">
         <div class="sw"><i class="ti ti-search"></i><input type="text" class="si" id="sq" placeholder="Search schools..." oninput="renderSchools()"></div>
-        <select class="fsel" id="fss" onchange="renderSchools()"><option value="">All states</option><option>Johor</option><option>Wilayah Persekutuan KL</option><option>Selangor</option><option>Negeri Sembilan</option><option>Putrajaya</option></select>
-        <select class="fsel" id="fsh" onchange="renderSchools()"><option value="">All heat</option><option>Hot</option><option>Warm</option><option>Cool</option><option>Cold</option></select>
+        <select class="fsel" id="fss" onchange="renderSchools()"><option value="">All states</option><option>Johor</option><option>Kuala Lumpur</option><option>Selangor</option></select>
+        <select class="fsel" id="fst" onchange="renderSchools()"><option value="">All types</option><option>International</option><option>SMK (National Secondary)</option><option>SMJK (National-type Chinese)</option><option>Kolej Vokasional / Teknik</option></select>
         <select class="fsel" id="fsc" onchange="renderSchools()"><option value="">All statuses</option><option>Not Contacted</option><option>Contacted</option><option>Interested</option><option>Proposal Sent</option><option>Confirmed</option><option>No Go</option><option>No Reach</option></select>
       </div>
       <div class="tc"><div class="tw"><table>
-        <thead><tr><th style="width:185px">School</th><th style="width:88px">Type</th><th style="width:105px">Status</th><th style="width:88px">Heat</th><th style="width:88px">Deal size</th><th style="width:110px">PIC</th><th style="width:90px">Source</th><th style="width:72px">Last contact</th><th style="width:78px">Next follow-up</th><th>Remarks</th></tr></thead>
+        <thead><tr><th style="width:210px">Schools</th><th style="width:88px">Type</th><th style="width:118px">Status</th><th style="width:145px">PIC</th><th style="width:125px">Contact number</th><th style="width:170px">Email</th><th>Remarks / feedback</th><th style="width:92px">Heat</th><th style="width:96px">Deal size</th></tr></thead>
         <tbody id="sb"></tbody>
       </table></div><div class="tf" id="sbf"></div></div>
+    </div>
+    <!-- PROPOSALS -->
+    <div class="panel" id="panel-proposals">
+      <div class="prop-shell">
+        <div class="prop-top">
+          <div>
+            <div class="sec-t">Proposals command center</div>
+            <div class="sm">Filter Audience -> Category -> Duration, then clone a matching template in under 2 minutes.</div>
+          </div>
+          <div class="view-tabs">
+            <button class="view-tab active" id="pv-kanban" onclick="setProposalView('kanban')"><i class="ti ti-layout-kanban"></i> Pipeline</button>
+            <button class="view-tab" id="pv-table" onclick="setProposalView('table')"><i class="ti ti-table"></i> Finder</button>
+          </div>
+        </div>
+        <div class="table-tools">
+          <div class="sw"><i class="ti ti-search"></i><input type="text" class="si" id="pq" placeholder="Search proposals..." oninput="renderProposals()"></div>
+          <select class="fsel" id="paud" onchange="renderProposals()"><option value="">All audiences</option><option>Primary School</option><option>Lower Secondary</option><option>Upper Secondary</option><option>Pre-U</option><option>University</option><option>Teachers</option><option>Parents</option><option>Working Adults</option></select>
+          <select class="fsel" id="pcat" onchange="renderProposals()"><option value="">All categories</option><option>AI Workshop</option><option>Coding Workshop</option><option>Career Exposure</option><option>Teacher Training</option><option>Holiday Program</option><option>Corporate Training</option><option>Competition/Event</option><option>Custom Program</option></select>
+          <select class="fsel" id="pdur" onchange="renderProposals()"><option value="">All durations</option><option>1 Hour Talk</option><option>2 Hour Workshop</option><option>Half Day</option><option>Full Day</option><option>4 Weeks</option><option>8 Weeks</option></select>
+          <button class="btn btn-sm" onclick="clearProposalFilters()"><i class="ti ti-filter-off"></i> Clear</button>
+        </div>
+        <div id="proposalKanban"></div>
+        <div class="tc" id="proposalTableWrap" style="display:none"><div class="tw"><table>
+          <thead><tr><th style="width:96px">ID</th><th style="width:190px">Proposal</th><th style="width:160px">Client</th><th style="width:120px">PIC</th><th style="width:140px">Category</th><th style="width:190px">Topic</th><th style="width:185px">Audience</th><th style="width:120px">Duration</th><th style="width:95px">Price</th><th style="width:110px">Status</th><th style="width:180px">Outcomes</th><th style="width:95px">Follow up</th><th style="width:120px">File</th><th style="width:180px">Remarks</th><th style="width:105px"></th></tr></thead>
+          <tbody id="proposalRows"></tbody>
+        </table></div><div class="tf" id="proposalCount"></div></div>
+        <div class="account-grid">
+          <div class="sec-h"><div class="sec-t">Account proposal sub-grid</div></div>
+          <div class="table-tools">
+            <select class="fsel" id="accountPick" onchange="renderAccountProposals()"><option value="">Select account / company</option></select>
+          </div>
+          <div id="accountProposalGrid" class="sm" style="margin-top:9px">Select an account to view linked proposals.</div>
+        </div>
+      </div>
     </div>
     <!-- OBJECTIONS -->
     <div class="panel" id="panel-objections">
@@ -269,10 +330,13 @@ const SGCLR={"New":"#0D9E8A","Replied":"#1254A0","Qualified":"#2E6010","Converte
 const TYCLS={"Parent":"p-parent","Student":"p-student","School":"p-school","Corporate":"p-corporate"};
 const HCLR={"Hot":"#A32020","Warm":"#8B5E10","Cool":"#1254A0","Cold":"#9AA3B0"};
 const HPCT={"Hot":90,"Warm":65,"Cool":35,"Cold":10};
+const SHEATS=["Hot","Warm","Cool","Cold"];
 const SSCLS={"Not Contacted":"p-nc","Contacted":"p-ct","Interested":"p-in","Proposal Sent":"p-ps","Confirmed":"p-cf","No Go":"p-ng","No Reach":"p-nr","Qualified":"p-in"};
 const CSCLS={"SMK":"p-smk","International":"p-intl","Private School":"p-priv","Private / International":"p-priv","Technical School":"p-tech","Special Arts School":"p-tech"};
 const CSLBL={"SMK":"SMK","International":"Intl","Private School":"Private","Private / International":"Priv/Intl","Technical School":"Technical","Special Arts School":"Arts"};
 const SSTATS=["Not Contacted","Contacted","Interested","Proposal Sent","Confirmed","No Go","No Reach"];
+const PSTATS=["Draft","Ready","Sent","Follow Up","Negotiating","Approved","Rejected","Completed"];
+const PSTATUS_COLORS={"Draft":"#5A6478","Ready":"#1254A0","Sent":"#4A3BAA","Follow Up":"#8B5E10","Negotiating":"#B45F06","Approved":"#12896A","Rejected":"#A32020","Completed":"#0A6E4A"};
 let selSrc="WhatsApp",eid=200;
 let apiReady=false;
 
@@ -286,16 +350,17 @@ function renderCurrentView(){
   renderKPI();renderInbox();
   const active=document.querySelector('.panel.active')?.id?.replace('panel-','');
   if(active==='channels')renderChannels();if(active==='responses')renderResponses();if(active==='funnel')renderFunnel();
-  if(active==='schools')renderSchools();if(active==='objections')renderObj();if(active==='closing')renderTac();if(active==='forecast')renderForecast();
+  if(active==='schools')renderSchools();if(active==='proposals')renderProposals();if(active==='objections')renderObj();if(active==='closing')renderTac();if(active==='forecast')renderForecast();
 }
 
 async function loadData(){
   try{
-    const [remoteEnqs,remoteSchools]=await Promise.all([
+    const [remoteEnqs,remoteSchools,remoteProposals]=await Promise.all([
       api('/api/enquiries'),
-      api('/api/schools')
+      api('/api/schools'),
+      api('/api/proposals')
     ]);
-    enqs=remoteEnqs;schools=remoteSchools;apiReady=true;
+    enqs=remoteEnqs;schools=remoteSchools;proposals=remoteProposals;apiReady=true;
   }catch(err){
     console.warn('Using browser-only data because API is unavailable:',err);
   }
@@ -304,6 +369,8 @@ async function loadData(){
 
 let enqs=[];
 let schools=[];
+let proposals=[];
+let proposalView='kanban';
 
 const CHANNELS=[
   {src:"WhatsApp",icon:"ti-brand-whatsapp",desc:"Highest-volume channel. Most Malaysian parents prefer WhatsApp for fast casual enquiries. Reply within 30 minutes for best conversion.",tips:["Save number as a contact immediately","Use voice notes for complex replies","Don't spam; ask before sending brochure","Always end with a clear next step"]},
@@ -369,6 +436,7 @@ function heatH(h){const pct=HPCT[h]||10,clr=HCLR[h]||'#9AA3B0';return `<div clas
 function fd(d){return d?d.replace('2025-',''):'—';}
 function rm(n){return n?'RM '+n.toLocaleString():'—';}
 function odClr(d){return d&&d<='2025-05-28'?'color:#A32020;font-weight:600':'color:#9AA3B0';}
+function esc(v){return String(v??'').replace(/[&<>"']/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;","\"":"&quot;","'":"&#39;"}[c]));}
 
 function renderKPI(){
   const tot=enqs.length,nw=enqs.filter(e=>e.stage==='New').length,ql=enqs.filter(e=>e.stage==='Qualified').length,cv=enqs.filter(e=>e.stage==='Converted').length,rate=tot?Math.round(cv/tot*100):0;
@@ -383,6 +451,8 @@ function renderKPI(){
     <div class="kc"><div class="kl">Overdue follow-ups</div><div class="kv r">${od}</div><div class="ks">schools need action</div><div class="ac" style="background:var(--danger)"></div></div>`;
   document.getElementById('nb-new').textContent=nw;
   document.getElementById('nb-sch').textContent=schools.filter(s=>['Hot','Warm'].includes(s.heat)).length;
+  const openProps=proposals.filter(p=>!['Rejected','Completed'].includes(p.status)).length;
+  const propBadge=document.getElementById('nb-prop');if(propBadge)propBadge.textContent=openProps;
 }
 
 function getFilt(){
@@ -447,13 +517,13 @@ function renderFunnel(){
 }
 
 function getSFilt(){
-  const q=(document.getElementById('sq').value||'').toLowerCase(),fs=document.getElementById('fss').value,fh=document.getElementById('fsh').value,fc=document.getElementById('fsc').value;
-  return schools.filter(s=>{if(q&&!s.name.toLowerCase().includes(q)&&!s.city.toLowerCase().includes(q))return false;if(fs&&s.state!==fs)return false;if(fh&&s.heat!==fh)return false;if(fc&&s.status!==fc)return false;return true;});
+  const q=(document.getElementById('sq').value||'').toLowerCase(),fs=document.getElementById('fss').value,ft=document.getElementById('fst').value,fc=document.getElementById('fsc').value;
+  return schools.filter(s=>{if(q&&![s.name,s.city,s.pic,s.phone,s.email,s.remarks].some(v=>String(v||'').toLowerCase().includes(q)))return false;if(fs&&s.state!==fs)return false;if(ft&&s.cat!==ft)return false;if(fc&&s.status!==fc)return false;return true;});
 }
 function renderSchools(){
   const f=getSFilt();document.getElementById('sbf').textContent=`Showing ${f.length} of ${schools.length} schools`;
   const tb=document.getElementById('sb');
-  if(!f.length){tb.innerHTML=`<tr><td colspan="10" style="text-align:center;padding:22px;color:var(--text3)">No schools match filters.</td></tr>`;return;}
+  if(!f.length){tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:22px;color:var(--text3)">No schools match filters.</td></tr>`;return;}
   tb.innerHTML=f.map(s=>{const i=schools.indexOf(s);return `<tr>
     <td><div class="sn">${s.name}</div><div class="sm">${s.city} · ${s.state.replace('Wilayah Persekutuan ','WP ')}</div></td>
     <td>${cpill(s.cat)}</td>
@@ -475,6 +545,87 @@ async function updSch(i,v){
   catch(err){schools[i].status=old;renderKPI();renderSchools();alert('Could not save school status. Please try again.');}
 }
 
+function getSFilt(){
+  const q=(document.getElementById('sq').value||'').toLowerCase(),fs=document.getElementById('fss').value,ft=document.getElementById('fst').value,fc=document.getElementById('fsc').value;
+  return schools.filter(s=>{if(q&&![s.name,s.city,s.pic,s.phone,s.email,s.remarks].some(v=>String(v||'').toLowerCase().includes(q)))return false;if(fs&&s.state!==fs)return false;if(ft&&s.cat!==ft)return false;if(fc&&s.status!==fc)return false;return true;});
+}
+function renderSchools(){
+  const f=getSFilt();document.getElementById('sbf').textContent=`Showing ${f.length} of ${schools.length} schools`;
+  const tb=document.getElementById('sb');
+  if(!f.length){tb.innerHTML=`<tr><td colspan="9" style="text-align:center;padding:22px;color:var(--text3)">No schools match filters.</td></tr>`;return;}
+  tb.innerHTML=f.map(s=>{const i=schools.indexOf(s);return `<tr>
+    <td><div class="sn">${esc(s.name)}</div><div class="sm">${esc(s.city)} · ${esc((s.state||'').replace('Wilayah Persekutuan ','WP '))}</div></td>
+    <td>${cpill(s.cat)}</td>
+    <td><select class="stsel" onchange="updSchField(${i},'status',this.value,true)">${SSTATS.map(st=>`<option${s.status===st?' selected':''}>${st}</option>`).join('')}</select></td>
+    <td><input class="cell-input" value="${esc(s.pic)}" placeholder="PIC name" onblur="updSchField(${i},'pic',this.value)"><div class="sm">${esc(s.picRole||'')}</div></td>
+    <td><input class="cell-input" value="${esc(s.phone)}" placeholder="Contact no." onblur="updSchField(${i},'phone',this.value)"></td>
+    <td><input class="cell-input" value="${esc(s.email)}" placeholder="Email" onblur="updSchField(${i},'email',this.value)"></td>
+    <td><textarea class="cell-area" placeholder="Remarks / feedback" onblur="updSchField(${i},'remarks',this.value)">${esc(s.remarks)}</textarea></td>
+    <td><select class="stsel" style="color:${HCLR[s.heat]||'#9AA3B0'}" onchange="updSchField(${i},'heat',this.value,true)">${SHEATS.map(h=>`<option${s.heat===h?' selected':''}>${h}</option>`).join('')}</select></td>
+    <td><input class="cell-input num" type="number" min="0" step="100" value="${Number(s.dealSize||0)}" onblur="updSchField(${i},'dealSize',this.value,true)"></td>
+  </tr>`;}).join('');
+}
+async function updSchField(i,field,value,rerender=false){
+  const old=schools[i][field];
+  const next=field==='dealSize'?Number(value||0):value;
+  if(old===next)return;
+  schools[i][field]=next;renderKPI();if(rerender)renderSchools();
+  if(!apiReady)return;
+  try{schools[i]=await api(`/api/schools/${schools[i].id}`,{method:"PATCH",body:JSON.stringify({[field]:next})});renderKPI();if(rerender)renderSchools();}
+  catch(err){schools[i][field]=old;renderKPI();renderSchools();alert('Could not save school update. Please try again.');}
+}
+
+function money(n){return n?`RM ${Number(n).toLocaleString()}`:'RM 0';}
+function isDue(d){return d&&d<=new Date().toISOString().slice(0,10);}
+function statusTag(status){const c=PSTATUS_COLORS[status]||'#5A6478';return `<span class="tag stat" style="background:${c}18;color:${c}">${esc(status)}</span>`;}
+function tagList(items,cls=''){return (items||[]).slice(0,3).map(x=>`<span class="tag ${cls}">${esc(x)}</span>`).join('');}
+function getProposalFilt(){
+  const q=(document.getElementById('pq')?.value||'').toLowerCase(),aud=document.getElementById('paud')?.value||'',cat=document.getElementById('pcat')?.value||'',dur=document.getElementById('pdur')?.value||'';
+  return proposals.filter(p=>{
+    const text=[p.proposalId,p.proposalName,p.client,p.pic,p.category,p.duration,(p.topics||[]).join(' '),(p.audiences||[]).join(' '),(p.outcomes||[]).join(' ')].join(' ').toLowerCase();
+    if(q&&!text.includes(q))return false;if(aud&&!(p.audiences||[]).includes(aud))return false;if(cat&&p.category!==cat)return false;if(dur&&p.duration!==dur)return false;return true;
+  });
+}
+function setProposalView(view){proposalView=view;document.getElementById('pv-kanban').classList.toggle('active',view==='kanban');document.getElementById('pv-table').classList.toggle('active',view==='table');renderProposals();}
+function clearProposalFilters(){['pq','paud','pcat','pdur'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});renderProposals();}
+function renderProposals(){
+  const filtered=getProposalFilt();
+  document.getElementById('proposalKanban').style.display=proposalView==='kanban'?'block':'none';
+  document.getElementById('proposalTableWrap').style.display=proposalView==='table'?'block':'none';
+  renderProposalKanban(filtered);renderProposalTable(filtered);renderAccountPicker();
+}
+function renderProposalKanban(items){
+  const wrap=document.getElementById('proposalKanban');
+  wrap.innerHTML=`<div class="kanban">${PSTATS.map(status=>{const col=items.filter(p=>p.status===status);return `<div class="kb-col" ondragover="event.preventDefault()" ondrop="dropProposal(event,'${status}')"><div class="kb-head"><span>${status}</span><span class="kb-count">${col.length}</span></div><div class="kb-body">${col.map(p=>`<div class="prop-card" draggable="true" ondragstart="dragProposal(event,${p.id})"><div class="prop-id">${esc(p.proposalId)}</div><div class="prop-name">${esc(p.proposalName)}</div><div class="prop-client">${esc(p.client||'Unassigned client')}</div><div class="prop-price">${money(p.price)}</div><div class="tag-row">${tagList(p.audiences,'aud')}${isDue(p.followUpDate)?'<span class="tag due"><i class="ti ti-alert-circle"></i> Due</span>':''}</div><div class="prop-actions" style="margin-top:9px;display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm" onclick="cloneProposal(${p.id})"><i class="ti ti-copy"></i> Clone</button><button class="btn btn-sm" onclick="generateProposalPdf(${p.id})"><i class="ti ti-file-type-pdf"></i> PDF</button></div></div>`).join('')}</div></div>`;}).join('')}</div>`;
+}
+function renderProposalTable(items){
+  document.getElementById('proposalRows').innerHTML=items.map(p=>`<tr><td>${esc(p.proposalId)}</td><td><div class="sn">${esc(p.proposalName)}</div></td><td>${esc(p.client||'—')}</td><td>${esc(p.pic||'—')}</td><td>${esc(p.category)}</td><td>${tagList(p.topics)}</td><td>${tagList(p.audiences,'aud')}</td><td>${esc(p.duration)}</td><td>${money(p.price)}</td><td>${statusTag(p.status)}</td><td>${tagList(p.outcomes)}</td><td>${isDue(p.followUpDate)?'<span class="tag due">Due</span> ':''}${esc(p.followUpDate||'—')}</td><td>${p.proposalFile?`<a href="${esc(p.proposalFile)}" target="_blank">Open</a>`:'—'}</td><td>${esc(p.remarks||'—')}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm" onclick="cloneProposal(${p.id})"><i class="ti ti-copy"></i> Clone</button><button class="btn btn-sm" onclick="generateProposalPdf(${p.id})"><i class="ti ti-file-type-pdf"></i> PDF</button></div></td></tr>`).join('');
+  document.getElementById('proposalCount').textContent=`Showing ${items.length} of ${proposals.length} proposals`;
+}
+function renderAccountPicker(){
+  const pick=document.getElementById('accountPick');if(!pick)return;
+  const current=pick.value;
+  const accounts=[...new Set([...schools.map(s=>s.name),...proposals.map(p=>p.client).filter(Boolean)])].sort();
+  pick.innerHTML='<option value="">Select account / company</option>'+accounts.map(a=>`<option${a===current?' selected':''}>${esc(a)}</option>`).join('');
+  renderAccountProposals();
+}
+function renderAccountProposals(){
+  const account=document.getElementById('accountPick')?.value||'',box=document.getElementById('accountProposalGrid');if(!box)return;
+  if(!account){box.textContent='Select an account to view linked proposals.';return;}
+  const linked=proposals.filter(p=>p.client===account);
+  if(!linked.length){box.innerHTML=`No proposals linked to <strong>${esc(account)}</strong> yet.`;return;}
+  box.innerHTML=`<div class="tw"><table><thead><tr><th>Proposal</th><th>Status</th><th>Value</th><th>Follow up</th><th></th></tr></thead><tbody>${linked.map(p=>`<tr><td>${esc(p.proposalName)}</td><td>${statusTag(p.status)}</td><td>${money(p.price)}</td><td>${esc(p.followUpDate||'—')}</td><td><button class="btn btn-sm" onclick="generateProposalPdf(${p.id})"><i class="ti ti-file-type-pdf"></i> PDF</button></td></tr>`).join('')}</tbody></table></div>`;
+}
+function dragProposal(event,id){event.dataTransfer.setData('text/plain',String(id));}
+async function dropProposal(event,status){const id=Number(event.dataTransfer.getData('text/plain'));const p=proposals.find(x=>x.id===id);if(!p||p.status===status)return;const old=p.status;p.status=status;renderProposals();try{Object.assign(p,await api(`/api/proposals/${id}`,{method:'PATCH',body:JSON.stringify({status})}));renderKPI();renderProposals();}catch(err){p.status=old;renderProposals();alert('Could not update proposal status.');}}
+async function cloneProposal(id){
+  const client=prompt('Assign cloned proposal to which client / school? Leave blank for template draft.','')||'';
+  const pic=client?prompt('PIC / person in charge?','')||'':'';
+  try{const cloned=await api(`/api/proposals/${id}/clone`,{method:'POST',body:JSON.stringify({client,pic})});proposals.push(cloned);renderKPI();renderProposals();alert(`Cloned as ${cloned.proposalId}. Status reset to Draft.`);}
+  catch(err){alert('Could not clone proposal.');}
+}
+function generateProposalPdf(id){window.open(`/api/proposals/${id}/pdf`,'_blank');}
+
 function renderObj(){document.getElementById('objList').innerHTML=OBJS.map(o=>`<div class="obj-card"><span class="pill" style="background:${o.clr};color:${o.tc}">${o.tag}</span><div class="obj-q">${o.q}</div><div class="obj-a">${o.a}</div></div>`).join('');}
 function renderTac(){document.getElementById('tacList').innerHTML=TACS.map(t=>`<div class="tac-card"><div class="tac-ico" style="background:${t.bg}"><i class="ti ${t.icon}" style="color:${t.ic};font-size:18px"></i></div><div style="flex:1"><div class="tac-name">${t.name}</div><div class="tac-desc">${t.desc}</div><div class="tac-when">${t.when}</div></div></div>`).join('');}
 
@@ -492,13 +643,13 @@ function updFc(){
   document.getElementById('fcModel').innerHTML=`<div class="fc"><div class="fcl">Per workshop</div><div class="fcv">RM ${pw.toLocaleString()}</div><div class="fcs">${sz} x RM ${fee}/student</div></div><div class="fc"><div class="fcl">Per month (${cls} school${cls>1?'s':''})</div><div class="fcv" style="color:#4ECFBF">RM ${pm.toLocaleString()}</div><div class="fcs">${cls} workshop${cls>1?'s':''}/month</div></div><div class="fc"><div class="fcl">Quarterly run rate</div><div class="fcv" style="color:#C9A84C">RM ${p3.toLocaleString()}</div><div class="fcs">3-month projection</div></div>`;
 }
 
-const PTITLES={inbox:"Enquiry inbox",channels:"Source channels",responses:"Response templates",funnel:"Conversion funnel",schools:"School pipeline",objections:"Objection playbook",closing:"Closing tactics",forecast:"Revenue forecast"};
+const PTITLES={inbox:"Enquiry inbox",channels:"Source channels",responses:"Response templates",funnel:"Conversion funnel",schools:"School pipeline",proposals:"Proposals",objections:"Objection playbook",closing:"Closing tactics",forecast:"Revenue forecast"};
 function sw(n,el){
   document.querySelectorAll('.nav').forEach(x=>x.classList.remove('active'));el.classList.add('active');
   document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));document.getElementById('panel-'+n).classList.add('active');
   document.getElementById('pgTitle').textContent=PTITLES[n]||n;
   if(n==='channels')renderChannels();if(n==='responses')renderResponses();if(n==='funnel')renderFunnel();
-  if(n==='schools')renderSchools();if(n==='objections')renderObj();if(n==='closing')renderTac();if(n==='forecast')renderForecast();
+  if(n==='schools')renderSchools();if(n==='proposals')renderProposals();if(n==='objections')renderObj();if(n==='closing')renderTac();if(n==='forecast')renderForecast();
 }
 
 function exportData(){
