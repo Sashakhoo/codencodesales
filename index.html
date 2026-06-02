@@ -285,7 +285,7 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
         </div>
         <div class="form-card open" style="margin-bottom:0">
           <div class="sec-h" style="margin-bottom:10px">
-            <div><div class="sec-t">Generate proposal</div><div class="sm">Enter a school name and brief request. The CRM creates a Draft proposal and Word template output automatically.</div></div>
+            <div><div class="sec-t">Generate proposal</div><div class="sm">Enter a school name and brief request. The CRM creates a Draft proposal and PDF output from the Word template automatically.</div></div>
             <button class="btn btn-c btn-sm" onclick="generateProposalFromPrompt()"><i class="ti ti-sparkles"></i> Generate</button>
           </div>
           <div class="fg3">
@@ -626,10 +626,10 @@ function renderProposals(){
 }
 function renderProposalKanban(items){
   const wrap=document.getElementById('proposalKanban');
-  wrap.innerHTML=`<div class="kanban">${PSTATS.map(status=>{const col=items.filter(p=>p.status===status);return `<div class="kb-col" ondragover="event.preventDefault()" ondrop="dropProposal(event,'${status}')"><div class="kb-head"><span>${status}</span><span class="kb-count">${col.length}</span></div><div class="kb-body">${col.map(p=>`<div class="prop-card" draggable="true" ondragstart="dragProposal(event,${p.id})"><div class="prop-id">${esc(p.proposalId)}</div><div class="prop-name">${esc(p.proposalName)}</div><div class="prop-client">${esc(p.client||'Unassigned client')}</div><div class="prop-price">${money(p.price)}</div><div class="tag-row">${tagList(p.audiences,'aud')}${isDue(p.followUpDate)?'<span class="tag due"><i class="ti ti-alert-circle"></i> Due</span>':''}</div><div class="prop-actions" style="margin-top:9px;display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm" onclick="cloneProposal(${p.id})"><i class="ti ti-copy"></i> Clone</button><button class="btn btn-sm" onclick="generateProposalDocx(${p.id})"><i class="ti ti-file-type-docx"></i> DOCX</button></div></div>`).join('')}</div></div>`;}).join('')}</div>`;
+  wrap.innerHTML=`<div class="kanban">${PSTATS.map(status=>{const col=items.filter(p=>p.status===status);return `<div class="kb-col" ondragover="event.preventDefault()" ondrop="dropProposal(event,'${status}')"><div class="kb-head"><span>${status}</span><span class="kb-count">${col.length}</span></div><div class="kb-body">${col.map(p=>`<div class="prop-card" draggable="true" ondragstart="dragProposal(event,${p.id})"><div class="prop-id">${esc(p.proposalId)}</div><div class="prop-name">${esc(p.proposalName)}</div><div class="prop-client">${esc(p.client||'Unassigned client')}</div><div class="prop-price">${money(p.price)}</div><div class="tag-row">${tagList(p.audiences,'aud')}${isDue(p.followUpDate)?'<span class="tag due"><i class="ti ti-alert-circle"></i> Due</span>':''}</div><div class="prop-actions" style="margin-top:9px;display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm" onclick="cloneProposal(${p.id})"><i class="ti ti-copy"></i> Clone</button><button class="btn btn-sm" onclick="generateProposalPdf(${p.id})"><i class="ti ti-file-type-pdf"></i> PDF</button></div></div>`).join('')}</div></div>`;}).join('')}</div>`;
 }
 function renderProposalTable(items){
-  document.getElementById('proposalRows').innerHTML=items.map(p=>`<tr><td>${esc(p.proposalId)}</td><td><div class="sn">${esc(p.proposalName)}</div></td><td>${esc(p.client||'—')}</td><td>${esc(p.pic||'—')}</td><td>${esc(p.category)}</td><td>${tagList(p.topics)}</td><td>${tagList(p.audiences,'aud')}</td><td>${esc(p.duration)}</td><td>${money(p.price)}</td><td>${statusTag(p.status)}</td><td>${tagList(p.outcomes)}</td><td>${isDue(p.followUpDate)?'<span class="tag due">Due</span> ':''}${esc(p.followUpDate||'—')}</td><td>${p.proposalFile?`<a href="${esc(p.proposalFile)}" target="_blank">Open</a>`:'—'}</td><td>${esc(p.remarks||'—')}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm" onclick="cloneProposal(${p.id})"><i class="ti ti-copy"></i> Clone</button><button class="btn btn-sm" onclick="generateProposalDocx(${p.id})"><i class="ti ti-file-type-docx"></i> DOCX</button></div></td></tr>`).join('');
+  document.getElementById('proposalRows').innerHTML=items.map(p=>`<tr><td>${esc(p.proposalId)}</td><td><div class="sn">${esc(p.proposalName)}</div></td><td>${esc(p.client||'—')}</td><td>${esc(p.pic||'—')}</td><td>${esc(p.category)}</td><td>${tagList(p.topics)}</td><td>${tagList(p.audiences,'aud')}</td><td>${esc(p.duration)}</td><td>${money(p.price)}</td><td>${statusTag(p.status)}</td><td>${tagList(p.outcomes)}</td><td>${isDue(p.followUpDate)?'<span class="tag due">Due</span> ':''}${esc(p.followUpDate||'—')}</td><td>${p.proposalFile?`<a href="${esc(p.proposalFile)}" target="_blank">Open</a>`:'—'}</td><td>${esc(p.remarks||'—')}</td><td><div style="display:flex;gap:5px;flex-wrap:wrap"><button class="btn btn-sm" onclick="cloneProposal(${p.id})"><i class="ti ti-copy"></i> Clone</button><button class="btn btn-sm" onclick="generateProposalPdf(${p.id})"><i class="ti ti-file-type-pdf"></i> PDF</button></div></td></tr>`).join('');
   document.getElementById('proposalCount').textContent=`Showing ${items.length} of ${proposals.length} proposals`;
 }
 function renderAccountPicker(){
@@ -644,7 +644,7 @@ function renderAccountProposals(){
   if(!account){box.textContent='Select an account to view linked proposals.';return;}
   const linked=proposals.filter(p=>p.client===account);
   if(!linked.length){box.innerHTML=`No proposals linked to <strong>${esc(account)}</strong> yet.`;return;}
-  box.innerHTML=`<div class="tw"><table><thead><tr><th>Proposal</th><th>Status</th><th>Value</th><th>Follow up</th><th></th></tr></thead><tbody>${linked.map(p=>`<tr><td>${esc(p.proposalName)}</td><td>${statusTag(p.status)}</td><td>${money(p.price)}</td><td>${esc(p.followUpDate||'—')}</td><td><button class="btn btn-sm" onclick="generateProposalDocx(${p.id})"><i class="ti ti-file-type-docx"></i> DOCX</button></td></tr>`).join('')}</tbody></table></div>`;
+  box.innerHTML=`<div class="tw"><table><thead><tr><th>Proposal</th><th>Status</th><th>Value</th><th>Follow up</th><th></th></tr></thead><tbody>${linked.map(p=>`<tr><td>${esc(p.proposalName)}</td><td>${statusTag(p.status)}</td><td>${money(p.price)}</td><td>${esc(p.followUpDate||'—')}</td><td><button class="btn btn-sm" onclick="generateProposalPdf(${p.id})"><i class="ti ti-file-type-pdf"></i> PDF</button></td></tr>`).join('')}</tbody></table></div>`;
 }
 function renderSchoolDatalist(){
   const list=document.getElementById('schoolNames');if(!list)return;
@@ -663,7 +663,7 @@ async function generateProposalFromPrompt(){
     ['gen-audience','gen-category','gen-duration'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
     renderKPI();
     setProposalView('table');
-    alert(`Generated ${created.proposalId} as a Draft. Use the DOCX button to download the tailored Word proposal.`);
+    alert(`Generated ${created.proposalId} as a Draft. Use the PDF button to download the tailored proposal.`);
   }catch(err){alert('Could not generate proposal. Please try again.');}
 }
 async function cloneProposal(id){

@@ -835,6 +835,130 @@ function buildProposalDocx(proposal, school) {
   return zip.toBuffer();
 }
 
+function proposalTemplatePdfLines(proposal, school) {
+  const client = proposal.client || "Client / School";
+  const schoolContext = school ? `${school.name}, ${school.city}, ${school.state}` : client;
+  const audiences = (proposal.audiences || []).join(", ") || "Target audience to be confirmed";
+  const topics = proposal.topics || [];
+  const outcomes = proposal.outcomes || [];
+  const today = new Date().toISOString().slice(0, 10);
+  const venue = school ? `${school.name} campus or online` : "Client venue or online";
+  const participants = proposal.duration?.includes("Weeks") ? "Cohort size to be confirmed" : "30-80 participants recommended";
+  const price = `RM ${Number(proposal.price || 0).toLocaleString()}`;
+  const isPremium = ["AI Workshop", "Teacher Training", "Corporate Training"].includes(proposal.category);
+  const lines = [];
+  const add = (textValue, size = 10, font = "F1") => lines.push({ text: textValue, size, font });
+  const heading = (textValue) => add(textValue, 13, "F2");
+  const body = (textValue) => add(textValue, 10, "F1");
+  const blank = () => add("", 6, "F1");
+
+  if (isPremium) {
+    heading("CodeNCode");
+    heading("School AI Workshop Proposal Template");
+    body(`${proposal.proposalId} | Prepared for ${schoolContext}`);
+    blank();
+    heading("1. Executive Summary");
+    body(`CodeNCode proposes ${proposal.proposalName} for ${schoolContext}. The program is designed for ${audiences}, with practical activities around ${topics.join(", ") || "AI and coding"} and expected outcomes in ${outcomes.join(", ") || "future-ready digital skills"}.`);
+    heading("2. About CodeNCode");
+    body("CodeNCode delivers beginner-friendly coding, AI, and digital skills programs for schools, students, parents, teachers, and working adults. Our approach combines clear explanation, guided hands-on practice, and project-based outputs.");
+    heading("3. Why AI Education Matters");
+    body("AI literacy, coding exposure, and digital confidence are essential future skills. This program helps participants understand technology concepts, practise responsible tool use, and connect learning to study, work, and future careers.");
+    heading("4. Proposed Workshop");
+    body(`Workshop title: ${proposal.proposalName}`);
+    body(`Target audience: ${audiences}`);
+    body(`Duration: ${proposal.duration || "To be confirmed"}`);
+    body(`Venue: ${venue}`);
+    body(`Participant capacity: ${participants}`);
+    body("Delivery mode: Physical or online");
+    heading("5. Learning Outcomes");
+    body(`Participants will understand ${topics.join(", ") || "AI and coding concepts"}, complete guided activities, and develop ${outcomes.join(", ") || "problem-solving and digital creativity"} skills.`);
+    heading("6. Workshop Topics");
+    (topics.length ? topics : ["Topic mix to be confirmed"]).forEach((topic) => body(`- ${topic}`));
+    heading("7. Sample Program Schedule");
+    body("Time | Activity | Learning Outcome");
+    body("Opening | Welcome, objectives, and relevance | Participants understand the purpose of the session");
+    body("Concept Briefing | Real-life examples and key terms | Participants build shared vocabulary");
+    body("Hands-on Build | Guided project activity | Participants create a practical output");
+    body("Showcase & Q&A | Sharing, feedback, next steps | Participants reflect and ask questions");
+    heading("8. Trainer Profile");
+    body("Trainer biography, qualifications, certifications, and industry experience to be inserted before final sending.");
+    heading("9. Previous Events & Success Stories");
+    body("Insert photos, testimonials, participant feedback, and school references before final sending.");
+    heading("10. Deliverables");
+    body("Training materials, certificates, project files, attendance/feedback summary, and optional post-event support.");
+    heading("11. Pricing Packages");
+    body(`Recommended package | ${proposal.duration || "To be confirmed"} | ${participants} | ${price}`);
+    heading("12. Customisation Options");
+    body("School-specific projects, STEM integration, AI competitions, career talks, holiday programs, and teacher training adaptations.");
+    heading("13. Equipment & Requirements");
+    body("Internet access, projector/screen, suitable venue setup, and laptops/tablets where hands-on activities require devices.");
+    heading("14. Terms & Conditions");
+    body("Payment schedule, cancellation policy, minimum participants, trainer assignment, event date, photos, and testimonials to be confirmed before final approval.");
+    heading("15. Acceptance Form");
+    body("School Representative Name:");
+    body("Position:");
+    body("Signature:");
+    body("Date:");
+    blank();
+    heading("Proposal Checklist");
+    [`[ ] School Name Updated: ${client}`, "[ ] Event Date Updated", `[ ] Pricing Updated: ${price}`, "[ ] Trainer Assigned", "[ ] Photos Inserted", "[ ] Testimonials Inserted", "[ ] Acceptance Page Completed"].forEach(body);
+    return lines;
+  }
+
+  heading("CodeNCode School Event Proposal Template");
+  body("Professional Template for Schools, Colleges & Educational Institutions");
+  body(`${proposal.proposalId} | Prepared for ${schoolContext}`);
+  blank();
+  heading("1. Cover Page");
+  body(`Program Title: ${proposal.proposalName}`);
+  body(`Prepared For: ${schoolContext}`);
+  body("Prepared By: CodeNCode");
+  body(`Date: ${today}`);
+  body("Contact: +60 113 165 2854 | codencodemy@gmail.com | codencode.my");
+  heading("2. Executive Summary");
+  body(`CodeNCode proposes ${proposal.proposalName} for ${schoolContext}. Objectives include practical exposure to ${topics.join(", ") || "coding and digital skills"} and measurable outcomes in ${outcomes.join(", ") || "future-ready learning"}.`);
+  heading("3. About CodeNCode");
+  body("CodeNCode provides coding, AI, and digital skills programs with hands-on learning, beginner-safe pacing, and adaptable school delivery.");
+  heading("4. Event Overview");
+  body(`Event Name: ${proposal.proposalName}`);
+  body(`Target Audience: ${audiences}`);
+  body(`Duration: ${proposal.duration || "To be confirmed"}`);
+  body("Mode: Physical or online");
+  body(`Venue: ${venue}`);
+  body(`Expected Participants: ${participants}`);
+  heading("5. Learning Objectives");
+  (outcomes.length ? outcomes : ["Future Skills", "Problem Solving", "Digital Creativity"]).forEach((outcome) => body(`- ${outcome}`));
+  heading("6. Program Agenda");
+  body("Time | Activity | Learning Outcome");
+  body("Opening | Welcome and objectives | Participants understand the session goals");
+  body("Hands-on Activity | Guided build | Participants practise the core skill");
+  body("Showcase & Q&A | Sharing and reflection | Participants consolidate learning");
+  heading("7. Workshop Modules");
+  body("Module 1: Introduction");
+  body("Module 2: Hands-On Activity");
+  body("Module 3: Project Building");
+  body("Module 4: Showcase & Q&A");
+  heading("8. Deliverables");
+  body("Training materials");
+  body("Certificate of Participation");
+  body("Project files");
+  body("Post-event support");
+  heading("9. Pricing & Packages");
+  body(`Package Name | Duration | Participants | Fee`);
+  body(`${proposal.category} | ${proposal.duration || "To be confirmed"} | ${participants} | ${price}`);
+  heading("10. Why Choose CodeNCode");
+  body("Industry-relevant curriculum, hands-on learning, experienced trainers, trilingual delivery options, and customisable content.");
+  heading("11. Testimonials & Previous Events");
+  body("Photos, feedback, school references, and success stories can be inserted before final sending.");
+  heading("12. Terms & Conditions");
+  body("Payment terms, cancellation policy, equipment requirements, minimum participants, and event date to be confirmed.");
+  heading("13. Acceptance Section");
+  body("School Representative Name:");
+  body("Signature:");
+  body("Date:");
+  return lines;
+}
+
 function buildProposalPdf(proposal, school) {
   const pageWidth = 595;
   const pageHeight = 842;
@@ -1684,7 +1808,7 @@ app.get("/api/proposals/:id/pdf", async (req, res, next) => {
     }
     if (!proposal) return res.status(404).json({ error: "Proposal not found." });
 
-    const pdf = buildProposalPdf(proposal, school);
+    const pdf = buildPdf(proposalTemplatePdfLines(proposal, school));
     const filename = `${proposal.proposalId}-${proposal.proposalName}`.replace(/[^a-z0-9_-]+/gi, "-").replace(/-+/g, "-");
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}.pdf"`);
