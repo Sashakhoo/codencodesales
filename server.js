@@ -402,6 +402,134 @@ function findSchoolByName(name) {
   return memory.schools.find((school) => school.name.toLowerCase() === target) || null;
 }
 
+function cleanList(items) {
+  return [...new Set(items.filter(Boolean))];
+}
+
+function hasAny(text, terms) {
+  const value = String(text || "").toLowerCase();
+  return terms.some((term) => value.includes(term));
+}
+
+function inferProposalCategory(prompt, override = "") {
+  if (proposalCategories.includes(override)) return override;
+  if (hasAny(prompt, ["teacher", "cpd", "educator", "staff training for teachers"])) return "Teacher Training";
+  if (hasAny(prompt, ["holiday", "camp", "school break", "semester break"])) return "Holiday Program";
+  if (hasAny(prompt, ["corporate", "company", "workplace", "staff", "employee"])) return "Corporate Training";
+  if (hasAny(prompt, ["competition", "hackathon", "event", "showcase"])) return "Competition/Event";
+  if (hasAny(prompt, ["python", "coding", "website", "app", "game", "scratch", "programming"])) return "Coding Workshop";
+  if (hasAny(prompt, ["ai", "artificial intelligence", "prompt", "chatbot", "content creation", "automation"])) return "AI Workshop";
+  if (hasAny(prompt, ["career", "exposure", "pathway", "future career"])) return "Career Exposure";
+  return "Custom Program";
+}
+
+function inferProposalTopics(category, prompt) {
+  const topics = [];
+  if (hasAny(prompt, ["introduction to ai", "ai literacy", "basic ai", "intro ai"])) topics.push("Introduction to AI");
+  if (hasAny(prompt, ["prompt", "chatgpt", "gemini"])) topics.push("AI Prompt Engineering");
+  if (hasAny(prompt, ["chatbot", "bot"])) topics.push("Build AI Chatbot");
+  if (hasAny(prompt, ["content", "marketing", "poster", "copywriting"])) topics.push("AI Content Creation");
+  if (hasAny(prompt, ["workplace", "productivity", "automation", "office"])) topics.push("AI for Workplace");
+  if (hasAny(prompt, ["python"])) topics.push("Python Fundamentals");
+  if (hasAny(prompt, ["website", "web page", "html", "css"])) topics.push("Build a Website");
+  if (hasAny(prompt, ["app", "mobile"])) topics.push("App Development");
+  if (hasAny(prompt, ["game", "pygame", "scratch"])) topics.push("Game Development");
+  if (!topics.length && ["AI Workshop", "Teacher Training", "Corporate Training"].includes(category)) {
+    topics.push("Introduction to AI", "AI Prompt Engineering");
+  }
+  if (!topics.length && ["Coding Workshop", "Holiday Program"].includes(category)) {
+    topics.push("Python Fundamentals", "Build a Website");
+  }
+  if (!topics.length && category === "Career Exposure") topics.push("Introduction to AI", "Python Fundamentals");
+  return cleanList(topics);
+}
+
+function inferProposalAudiences(prompt, school, override = "") {
+  if (override) return [override];
+  const audiences = [];
+  const name = `${school?.name || ""} ${school?.cat || ""}`;
+  if (hasAny(prompt, ["teacher", "educator", "school staff"]) || hasAny(name, ["teacher"])) audiences.push("Teachers");
+  if (hasAny(prompt, ["parent"])) audiences.push("Parents");
+  if (hasAny(prompt, ["university", "college"])) audiences.push("University");
+  if (hasAny(prompt, ["pre-u", "pre u", "a level", "foundation"])) audiences.push("Pre-U");
+  if (hasAny(prompt, ["primary", "standard 4", "standard 5", "standard 6"]) || hasAny(name, ["primary", "sjkc", "sk "])) audiences.push("Primary School");
+  if (hasAny(prompt, ["lower secondary", "form 1", "form 2", "form 3"])) audiences.push("Lower Secondary");
+  if (hasAny(prompt, ["upper secondary", "form 4", "form 5", "spm", "igcse"])) audiences.push("Upper Secondary");
+  if (hasAny(prompt, ["working adult", "staff", "employee", "corporate"])) audiences.push("Working Adults");
+  if (!audiences.length && hasAny(name, ["international"])) audiences.push("Lower Secondary", "Upper Secondary");
+  if (!audiences.length && hasAny(name, ["smk", "smjk", "secondary", "high school"])) audiences.push("Lower Secondary", "Upper Secondary");
+  if (!audiences.length) audiences.push("Upper Secondary");
+  return cleanList(audiences);
+}
+
+function inferProposalDuration(prompt, override = "") {
+  const allowed = ["1 Hour Talk", "2 Hour Workshop", "Half Day", "Full Day", "4 Weeks", "8 Weeks"];
+  if (allowed.includes(override)) return override;
+  if (hasAny(prompt, ["8 week", "eight week"])) return "8 Weeks";
+  if (hasAny(prompt, ["4 week", "four week", "month"])) return "4 Weeks";
+  if (hasAny(prompt, ["full day", "1 day", "one day"])) return "Full Day";
+  if (hasAny(prompt, ["half day"])) return "Half Day";
+  if (hasAny(prompt, ["2 hour", "two hour"])) return "2 Hour Workshop";
+  if (hasAny(prompt, ["1 hour", "one hour", "talk", "assembly"])) return "1 Hour Talk";
+  return "2 Hour Workshop";
+}
+
+function inferProposalPrice(duration, category, override) {
+  const parsed = Number(override);
+  if (parsed > 0) return parsed;
+  const byDuration = {
+    "1 Hour Talk": 1200,
+    "2 Hour Workshop": 2500,
+    "Half Day": 3500,
+    "Full Day": 6800,
+    "4 Weeks": 7200,
+    "8 Weeks": 12800,
+  };
+  const base = byDuration[duration] || 2500;
+  return category === "Corporate Training" ? Math.round(base * 1.25) : base;
+}
+
+function inferProposalOutcomes(category, topics, prompt) {
+  const outcomes = [];
+  if (category.includes("AI") || topics.some((topic) => topic.includes("AI"))) outcomes.push("AI Literacy", "Future Skills");
+  if (topics.some((topic) => ["Python Fundamentals", "Build a Website", "App Development", "Game Development"].includes(topic))) outcomes.push("Coding Fundamentals", "Problem Solving", "STEM");
+  if (hasAny(prompt, ["creative", "content", "app", "website", "game"])) outcomes.push("Digital Creativity");
+  if (hasAny(prompt, ["business", "startup", "entrepreneur"])) outcomes.push("Entrepreneurship");
+  if (category === "Career Exposure" || hasAny(prompt, ["career", "future job"])) outcomes.push("Career Readiness");
+  if (!outcomes.length) outcomes.push("Future Skills", "Problem Solving");
+  return cleanList(outcomes);
+}
+
+function buildGeneratedProposal(data, school = null) {
+  const prompt = data.prompt || data.notes || data.remarks || "";
+  const client = data.client || data.school || school?.name || "";
+  const category = inferProposalCategory(prompt, data.category);
+  const topics = inferProposalTopics(category, prompt);
+  const audiences = inferProposalAudiences(prompt, school, data.audience);
+  const duration = inferProposalDuration(prompt, data.duration);
+  const price = inferProposalPrice(duration, category, data.price);
+  const outcomes = inferProposalOutcomes(category, topics, prompt);
+  const fit = school
+    ? `Matched school profile: ${school.name}, ${school.city || "city TBC"}, ${school.state || "state TBC"} (${school.cat || "type TBC"}).`
+    : "No exact school profile matched yet; assign account details before sending.";
+  const request = prompt ? `Prompt/request: ${prompt}` : "Prompt/request: Auto-generated from school name and default codencode proposal structure.";
+  return {
+    proposalName: `${client || "New Client"} - ${category} Proposal`,
+    client,
+    pic: data.pic || school?.pic || "",
+    category,
+    topics,
+    audiences,
+    duration,
+    price,
+    status: "Draft",
+    outcomes,
+    followUpDate: "",
+    proposalFile: "",
+    remarks: `${fit}\n${request}\nGenerated sections follow Type A/B/J/F/I proposal structure.`,
+  };
+}
+
 function proposalTemplateSections(proposal, school) {
   const client = proposal.client || "Client / School";
   const audiences = (proposal.audiences || []).join(", ") || "target participants";
@@ -976,6 +1104,57 @@ app.get("/api/accounts/:account/proposals", async (req, res, next) => {
     }
     const { rows } = await query("SELECT * FROM proposals WHERE lower(client) = lower($1) ORDER BY proposal_id ASC", [account]);
     res.json(rows.map(toProposal));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.post("/api/proposals/generate", async (req, res, next) => {
+  try {
+    const input = req.body || {};
+    let school = null;
+    const schoolName = input.school || input.client || "";
+    if (!pool) {
+      school = findSchoolByName(schoolName);
+    } else if (schoolName) {
+      const schoolResult = await query("SELECT * FROM schools WHERE lower(name) = lower($1) LIMIT 1", [schoolName]);
+      school = schoolResult.rows[0] ? toSchool(schoolResult.rows[0]) : null;
+    }
+    const proposal = normalizeProposal(buildGeneratedProposal(input, school));
+
+    if (!pool) {
+      const item = { id: memory.proposals.length + 1, proposalId: nextProposalId(), ...proposal };
+      memory.proposals.push(item);
+      writeProposalStore();
+      return res.status(201).json(item);
+    }
+
+    const { rows: lastRows } = await query("SELECT proposal_id FROM proposals ORDER BY proposal_id DESC LIMIT 1");
+    const lastNumber = Number(String(lastRows[0]?.proposal_id || "PROP-0000").replace("PROP-", "")) || 0;
+    const proposalId = `PROP-${String(lastNumber + 1).padStart(4, "0")}`;
+    const { rows } = await query(
+      `INSERT INTO proposals
+        (proposal_id, proposal_name, client, pic, category, topics, audiences, duration, price, status, outcomes, follow_up_date, proposal_file, remarks)
+       VALUES ($1,$2,$3,$4,$5,$6,$7,$8,$9,$10,$11,$12,$13,$14)
+       RETURNING *`,
+      [
+        proposalId,
+        proposal.proposalName,
+        proposal.client,
+        proposal.pic,
+        proposal.category,
+        proposal.topics,
+        proposal.audiences,
+        proposal.duration,
+        proposal.price,
+        proposal.status,
+        proposal.outcomes,
+        null,
+        proposal.proposalFile,
+        proposal.remarks,
+      ],
+    );
+    res.status(201).json(toProposal(rows[0]));
   } catch (error) {
     next(error);
   }

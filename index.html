@@ -283,6 +283,24 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
           <select class="fsel" id="pdur" onchange="renderProposals()"><option value="">All durations</option><option>1 Hour Talk</option><option>2 Hour Workshop</option><option>Half Day</option><option>Full Day</option><option>4 Weeks</option><option>8 Weeks</option></select>
           <button class="btn btn-sm" onclick="clearProposalFilters()"><i class="ti ti-filter-off"></i> Clear</button>
         </div>
+        <div class="form-card open" style="margin-bottom:0">
+          <div class="sec-h" style="margin-bottom:10px">
+            <div><div class="sec-t">Generate proposal</div><div class="sm">Enter a school name and brief request. The CRM creates a Draft proposal and PDF-ready structure automatically.</div></div>
+            <button class="btn btn-c btn-sm" onclick="generateProposalFromPrompt()"><i class="ti ti-sparkles"></i> Generate</button>
+          </div>
+          <div class="fg3">
+            <div><div class="fl">School / company</div><input class="fi" id="gen-school" list="schoolNames" placeholder="e.g. AIS International School"></div>
+            <div><div class="fl">PIC</div><input class="fi" id="gen-pic" placeholder="optional"></div>
+            <div><div class="fl">Price override</div><input class="fi" id="gen-price" type="number" min="0" step="100" placeholder="auto"></div>
+          </div>
+          <div class="fg3">
+            <div><div class="fl">Audience</div><select class="fi" id="gen-audience"><option value="">Auto detect</option><option>Primary School</option><option>Lower Secondary</option><option>Upper Secondary</option><option>Pre-U</option><option>University</option><option>Teachers</option><option>Parents</option><option>Working Adults</option></select></div>
+            <div><div class="fl">Category</div><select class="fi" id="gen-category"><option value="">Auto detect</option><option>AI Workshop</option><option>Coding Workshop</option><option>Career Exposure</option><option>Teacher Training</option><option>Holiday Program</option><option>Corporate Training</option><option>Competition/Event</option><option>Custom Program</option></select></div>
+            <div><div class="fl">Duration</div><select class="fi" id="gen-duration"><option value="">Auto detect</option><option>1 Hour Talk</option><option>2 Hour Workshop</option><option>Half Day</option><option>Full Day</option><option>4 Weeks</option><option>8 Weeks</option></select></div>
+          </div>
+          <div><div class="fl">Prompt / relevant info</div><textarea class="fi" id="gen-prompt" rows="3" placeholder="Example: Form 4 students, 2-hour AI prompt engineering workshop, include chatbot demo and career exposure."></textarea></div>
+          <datalist id="schoolNames"></datalist>
+        </div>
         <div class="template-guide">
           <div class="template-step"><div class="template-type">TYPE A</div><div class="template-title">Client Understanding</div><div class="template-note">AS-IS, need, TO-BE, and proposal direction tailored to the school/company.</div></div>
           <div class="template-step"><div class="template-type">TYPE B</div><div class="template-title">Strategy & Value</div><div class="template-note">Three differentiators, why codencode fits, and expected value.</div></div>
@@ -604,7 +622,7 @@ function renderProposals(){
   const filtered=getProposalFilt();
   document.getElementById('proposalKanban').style.display=proposalView==='kanban'?'block':'none';
   document.getElementById('proposalTableWrap').style.display=proposalView==='table'?'block':'none';
-  renderProposalKanban(filtered);renderProposalTable(filtered);renderAccountPicker();
+  renderProposalKanban(filtered);renderProposalTable(filtered);renderAccountPicker();renderSchoolDatalist();
 }
 function renderProposalKanban(items){
   const wrap=document.getElementById('proposalKanban');
@@ -628,8 +646,26 @@ function renderAccountProposals(){
   if(!linked.length){box.innerHTML=`No proposals linked to <strong>${esc(account)}</strong> yet.`;return;}
   box.innerHTML=`<div class="tw"><table><thead><tr><th>Proposal</th><th>Status</th><th>Value</th><th>Follow up</th><th></th></tr></thead><tbody>${linked.map(p=>`<tr><td>${esc(p.proposalName)}</td><td>${statusTag(p.status)}</td><td>${money(p.price)}</td><td>${esc(p.followUpDate||'—')}</td><td><button class="btn btn-sm" onclick="generateProposalPdf(${p.id})"><i class="ti ti-file-type-pdf"></i> PDF</button></td></tr>`).join('')}</tbody></table></div>`;
 }
+function renderSchoolDatalist(){
+  const list=document.getElementById('schoolNames');if(!list)return;
+  list.innerHTML=schools.slice().sort((a,b)=>a.name.localeCompare(b.name)).map(s=>`<option value="${esc(s.name)}"></option>`).join('');
+}
 function dragProposal(event,id){event.dataTransfer.setData('text/plain',String(id));}
 async function dropProposal(event,status){const id=Number(event.dataTransfer.getData('text/plain'));const p=proposals.find(x=>x.id===id);if(!p||p.status===status)return;const old=p.status;p.status=status;renderProposals();try{Object.assign(p,await api(`/api/proposals/${id}`,{method:'PATCH',body:JSON.stringify({status})}));renderKPI();renderProposals();}catch(err){p.status=old;renderProposals();alert('Could not update proposal status.');}}
+async function generateProposalFromPrompt(){
+  const get=id=>(document.getElementById(id)?.value||'').trim();
+  const payload={school:get('gen-school'),pic:get('gen-pic'),prompt:get('gen-prompt'),audience:get('gen-audience'),category:get('gen-category'),duration:get('gen-duration'),price:get('gen-price')};
+  if(!payload.school&&!payload.prompt){alert('Enter a school/company name or a short proposal prompt first.');return;}
+  try{
+    const created=await api('/api/proposals/generate',{method:'POST',body:JSON.stringify(payload)});
+    proposals.push(created);
+    ['gen-school','gen-pic','gen-price','gen-prompt'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    ['gen-audience','gen-category','gen-duration'].forEach(id=>{const el=document.getElementById(id);if(el)el.value='';});
+    renderKPI();
+    setProposalView('table');
+    alert(`Generated ${created.proposalId} as a Draft. Use the PDF button to download the tailored proposal.`);
+  }catch(err){alert('Could not generate proposal. Please try again.');}
+}
 async function cloneProposal(id){
   const client=prompt('Assign cloned proposal to which client / school? Leave blank for template draft.','')||'';
   const pic=client?prompt('PIC / person in charge?','')||'':'';
