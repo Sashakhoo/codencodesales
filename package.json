@@ -9,6 +9,7 @@
     "import:schools": "node scripts/import-schools.js crm_school_pipeline_import.csv"
   },
   "dependencies": {
+    "adm-zip": "^0.5.16",
     "express": "^4.19.2",
     "pg": "^8.12.0"
   },

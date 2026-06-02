@@ -3,6 +3,7 @@ import fs from "node:fs";
 import path from "node:path";
 import { fileURLToPath } from "node:url";
 import pg from "pg";
+import AdmZip from "adm-zip";
 
 const { Pool } = pg;
 const __filename = fileURLToPath(import.meta.url);
@@ -11,6 +12,8 @@ const app = express();
 const port = process.env.PORT || 3000;
 const schoolImportFile = path.join(__dirname, "crm_school_pipeline_import.csv");
 const proposalStoreFile = path.join(__dirname, "proposals_store.json");
+const schoolEventProposalTemplateFile = path.join(__dirname, "proposal_templates", "CodeNCode_School_Event_Proposal_Template.docx");
+const premiumProposalTemplateFile = path.join(__dirname, "proposal_templates", "CodeNCode_Premium_Proposal_Template.docx");
 const schoolImportFields = [
   "name",
   "category",
@@ -363,6 +366,14 @@ function ascii(text) {
 
 function pdfEscape(text) {
   return ascii(text).replace(/\\/g, "\\\\").replace(/\(/g, "\\(").replace(/\)/g, "\\)");
+}
+
+function xmlEscape(text) {
+  return ascii(text)
+    .replace(/&/g, "&amp;")
+    .replace(/</g, "&lt;")
+    .replace(/>/g, "&gt;")
+    .replace(/"/g, "&quot;");
 }
 
 function wrapText(text, max = 88) {
@@ -721,6 +732,107 @@ function buildPdf(lines) {
   }
   pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`;
   return Buffer.from(pdf, "latin1");
+}
+
+function selectProposalDocxTemplate(proposal) {
+  if (["AI Workshop", "Teacher Training", "Corporate Training"].includes(proposal.category)) {
+    return premiumProposalTemplateFile;
+  }
+  return schoolEventProposalTemplateFile;
+}
+
+function replaceXmlText(xml, replacements) {
+  let output = xml;
+  for (const [find, replace] of replacements) {
+    output = output.split(find).join(xmlEscape(replace));
+  }
+  return output;
+}
+
+function proposalDocxReplacements(proposal, school) {
+  const client = proposal.client || "Client / School";
+  const schoolContext = school ? `${school.name}, ${school.city}, ${school.state}` : client;
+  const audiences = (proposal.audiences || []).join(", ") || "Target audience to be confirmed";
+  const topics = proposal.topics || [];
+  const outcomes = proposal.outcomes || [];
+  const today = new Date().toISOString().slice(0, 10);
+  const venue = school ? `${school.name} campus or online` : "Client venue or online";
+  const participants = proposal.duration?.includes("Weeks") ? "Cohort size to be confirmed" : "30-80 participants recommended";
+  const summary = `CodeNCode proposes ${proposal.proposalName} for ${schoolContext}. The program is designed for ${audiences}, with practical activities around ${topics.join(", ") || "coding and AI"} and expected outcomes in ${outcomes.join(", ") || "future-ready digital skills"}.`;
+  const about = "CodeNCode delivers beginner-friendly coding, AI, and digital skills programs for schools, students, parents, teachers, and working adults. Our approach combines clear explanation, guided hands-on practice, and project-based outputs.";
+  const whyAi = "AI literacy, coding exposure, and digital confidence are now essential future skills. This program helps participants understand technology concepts, practise responsible tool use, and connect learning to study, work, and future careers.";
+  const overview = `${proposal.proposalName} | Audience: ${audiences} | Duration: ${proposal.duration || "To be confirmed"} | Venue: ${venue} | Participants: ${participants} | Mode: Physical or online`;
+  const learning = `Participants will understand ${topics.join(", ") || "AI and coding concepts"}, complete guided activities, and develop ${outcomes.join(", ") || "problem-solving and digital creativity"} skills.`;
+  const schedule = `Opening and objectives | Concept briefing | Hands-on project build | Showcase and Q&A | Feedback and next steps`;
+  const deliverables = "Training materials, certificate of participation, project files, attendance/feedback summary, and optional post-event support.";
+  const pricing = `Recommended package: ${proposal.duration || "To be confirmed"} | ${participants} | RM ${Number(proposal.price || 0).toLocaleString()}`;
+  const requirements = "Internet access, projector/screen, suitable venue setup, and laptops/tablets where hands-on activities require devices.";
+  const terms = "Payment schedule, cancellation policy, minimum participants, trainer assignment, event date, photos, and testimonials to be confirmed before final approval.";
+  const topicLine = topics.length ? topics.map((topic) => `- ${topic}`).join(" ") : "- Topic mix to be confirmed";
+  return [
+    ["CodeNCode School Event Proposal Template", "CodeNCode School Event Proposal"],
+    ["Professional Template for Schools, Colleges &amp; Educational Institutions", `${proposal.proposalId} | Prepared for ${schoolContext}`],
+    ["CodeNCodeSchool AI Workshop Proposal Template", "CodeNCode School AI Workshop Proposal"],
+    ["School AI Workshop Proposal Template", "School AI Workshop Proposal"],
+    ["Prepared For: [School Name]", `Prepared For: ${schoolContext}`],
+    ["Date: [Date]", `Date: ${today}`],
+    ["Contact: [Phone] | [Email] | [Website]", "Contact: +60 113 165 2854 | codencodemy@gmail.com | codencode.my"],
+    ["Brief introduction of CodeNCode, objectives of the workshop/event, and expected outcomes.", summary],
+    ["Introduce CodeNCode, the proposed workshop, objectives, expected outcomes, and benefits to students.", summary],
+    ["Company background, mission, achievements, trainer profiles, previous schools served.", about],
+    ["Company profile, mission, vision, achievements, trainer credentials, and previous collaborations.", about],
+    ["Importance of AI literacy, future careers, digital transformation, and industry relevance.", whyAi],
+    ["Event Name", `Event Name: ${proposal.proposalName}`],
+    ["Target Audience", `Target Audience: ${audiences}`],
+    ["Duration", `Duration: ${proposal.duration || "To be confirmed"}`],
+    ["Mode (Physical/Online)", "Mode: Physical or online"],
+    ["Venue", `Venue: ${venue}`],
+    ["Expected Participants", `Expected Participants: ${participants}`],
+    ["Workshop title, target audience, duration, venue, participant capacity, delivery mode.", overview],
+    ["• Understand AI concepts", `- Understand ${topics[0] || "AI and coding"} concepts`],
+    ["• Build practical projects", "- Build practical mini projects"],
+    ["• Improve digital literacy", "- Improve digital literacy"],
+    ["• Develop future-ready skills", `- Develop ${outcomes.join(", ") || "future-ready skills"}`],
+    ["Students will understand AI concepts, create projects, and develop problem-solving skills.", learning],
+    ["• Build Your First AI App", topicLine],
+    ["• Intro to AI Creation", ""],
+    ["• Build a Website in 2 Hours", ""],
+    ["• AI for Future Creators", ""],
+    ["• AI for Workplace", ""],
+    ["• Career Exposure: Future Jobs &amp; AI", ""],
+    ["Time | Activity | Learning Outcome", schedule],
+    ["Module 1: Introduction", "Module 1: Introduction and context setting"],
+    ["Module 2: Hands-On Activity", "Module 2: Guided hands-on activity"],
+    ["Module 3: Project Building", "Module 3: Project building and facilitator support"],
+    ["Module 4: Showcase &amp; Q&amp;A", "Module 4: Showcase, Q&amp;A, and feedback"],
+    ["Training materialsCertificate of ParticipationProject filesPost-event support", deliverables],
+    ["Training materials, certificates, project files, attendance report, post-event support.", deliverables],
+    ["Package Name | Duration | Participants | Fee", pricing],
+    ["Package A – 2 HoursPackage B – Half DayPackage C – Full DayPackage D – Holiday Camp", pricing],
+    ["Industry-relevant curriculum, hands-on learning, experienced trainers, customizable content.", "Industry-relevant curriculum, hands-on learning, experienced trainers, trilingual delivery options, and customisable school content."],
+    ["Photos, feedback, school references, success stories.", "Photos, participant feedback, school references, and success stories can be inserted before final sending."],
+    ["Insert photos, testimonials, participant feedback, and school references.", "Insert photos, testimonials, participant feedback, and school references before final sending."],
+    ["School-specific projects, STEM integration, AI competitions, career talks.", "School-specific projects, STEM integration, AI competitions, career talks, holiday programs, and teacher training adaptations."],
+    ["Internet, projector, laptops/tablets, venue setup requirements.", requirements],
+    ["Payment terms, cancellation policy, equipment requirements.", terms],
+    ["Payment schedule, cancellation policy, minimum participants.", terms],
+    ["School Representative Name:", "School Representative Name:"],
+    ["☐ School Name Updated", `[ ] School Name Updated: ${client}`],
+    ["☐ Event Date Updated", "[ ] Event Date Updated"],
+    ["☐ Pricing Updated", `[ ] Pricing Updated: RM ${Number(proposal.price || 0).toLocaleString()}`],
+    ["☐ Trainer Assigned", "[ ] Trainer Assigned"],
+    ["☐ Acceptance Page Completed", "[ ] Acceptance Page Completed"],
+  ];
+}
+
+function buildProposalDocx(proposal, school) {
+  const templateFile = selectProposalDocxTemplate(proposal);
+  if (!fs.existsSync(templateFile)) throw new Error("Proposal DOCX template is missing.");
+  const zip = new AdmZip(templateFile);
+  const documentXml = zip.readAsText("word/document.xml");
+  const nextXml = replaceXmlText(documentXml, proposalDocxReplacements(proposal, school));
+  zip.updateFile("word/document.xml", Buffer.from(nextXml, "utf8"));
+  return zip.toBuffer();
 }
 
 function buildProposalPdf(proposal, school) {
@@ -1521,6 +1633,34 @@ app.post("/api/proposals/:id/clone", async (req, res, next) => {
       ],
     );
     res.status(201).json(toProposal(rows[0]));
+  } catch (error) {
+    next(error);
+  }
+});
+
+app.get("/api/proposals/:id/docx", async (req, res, next) => {
+  try {
+    const id = Number(req.params.id);
+    let proposal;
+    let school = null;
+    if (!pool) {
+      proposal = memory.proposals.find((item) => item.id === id);
+      school = findSchoolByName(proposal?.client);
+    } else {
+      const proposalResult = await query("SELECT * FROM proposals WHERE id = $1", [id]);
+      if (proposalResult.rows.length) {
+        proposal = toProposal(proposalResult.rows[0]);
+        const schoolResult = await query("SELECT * FROM schools WHERE lower(name) = lower($1) LIMIT 1", [proposal.client]);
+        school = schoolResult.rows[0] ? toSchool(schoolResult.rows[0]) : null;
+      }
+    }
+    if (!proposal) return res.status(404).json({ error: "Proposal not found." });
+
+    const docx = buildProposalDocx(proposal, school);
+    const filename = `${proposal.proposalId}-${proposal.proposalName}`.replace(/[^a-z0-9_-]+/gi, "-").replace(/-+/g, "-");
+    res.setHeader("Content-Type", "application/vnd.openxmlformats-officedocument.wordprocessingml.document");
+    res.setHeader("Content-Disposition", `attachment; filename="${filename}.docx"`);
+    res.send(docx);
   } catch (error) {
     next(error);
   }
