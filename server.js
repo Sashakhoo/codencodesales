@@ -723,6 +723,176 @@ function buildPdf(lines) {
   return Buffer.from(pdf, "latin1");
 }
 
+function buildProposalPdf(proposal, school) {
+  const pageWidth = 595;
+  const pageHeight = 842;
+  const margin = 46;
+  const colors = {
+    dark: [0.04, 0.09, 0.16],
+    green: [0.07, 0.65, 0.45],
+    teal: [0.18, 0.72, 0.66],
+    soft: [0.95, 0.98, 0.97],
+    line: [0.82, 0.87, 0.9],
+    muted: [0.36, 0.4, 0.48],
+    gold: [0.74, 0.57, 0.18],
+    white: [1, 1, 1],
+  };
+  const client = proposal.client || "Client / School";
+  const schoolContext = school ? `${school.name}, ${school.city}, ${school.state}` : client;
+  const audiences = (proposal.audiences || []).join(", ") || "Target audience to be confirmed";
+  const topics = proposal.topics || [];
+  const outcomes = proposal.outcomes || [];
+  const sections = proposalTemplateSections(proposal, school);
+  const today = new Date().toISOString().slice(0, 10);
+  const pages = [[]];
+  let pageIndex = 0;
+  let y = pageHeight - margin;
+
+  const rgb = (color, op = "rg") => `${color.map((value) => value.toFixed(3)).join(" ")} ${op}`;
+  const command = (value) => pages[pageIndex].push(value);
+  const rect = (x, ry, width, height, color, stroke = false) => {
+    command(`q ${rgb(color, stroke ? "RG" : "rg")} ${x} ${ry} ${width} ${height} re ${stroke ? "S" : "f"} Q`);
+  };
+  const line = (x1, y1, x2, y2, color = colors.line, width = 1) => {
+    command(`q ${rgb(color, "RG")} ${width} w ${x1} ${y1} m ${x2} ${y2} l S Q`);
+  };
+  const text = (value, x, ty, size = 10, font = "F1", color = colors.dark) => {
+    command(`BT /${font} ${size} Tf ${rgb(color)} ${x} ${ty} Td (${pdfEscape(value)}) Tj ET`);
+  };
+  const widthToChars = (width, size) => Math.max(24, Math.floor(width / (size * 0.48)));
+  const paragraph = (value, x, width, size = 10, font = "F1", color = colors.dark, gap = 4) => {
+    const lines = wrapText(value, widthToChars(width, size));
+    lines.forEach((item) => {
+      if (y < 90) addPage();
+      text(item, x, y, size, font, color);
+      y -= size + gap;
+    });
+  };
+  const bullet = (value, x, width) => {
+    if (y < 96) addPage();
+    text("-", x, y, 10, "F2", colors.green);
+    const startY = y;
+    y = startY;
+    paragraph(value, x + 14, width - 14, 10, "F1", colors.dark, 4);
+  };
+  const sectionTitle = (title, type = "") => {
+    if (y < 132) addPage();
+    y -= 10;
+    rect(margin, y - 22, pageWidth - margin * 2, 30, colors.soft);
+    rect(margin, y - 22, 5, 30, colors.green);
+    text(title, margin + 14, y - 4, 13, "F2", colors.dark);
+    if (type) text(`Type ${type}`, pageWidth - margin - 48, y - 4, 9, "F2", colors.green);
+    y -= 42;
+  };
+  const keyValue = (label, value, x, ry, width) => {
+    text(label, x, ry + 23, 8, "F2", colors.muted);
+    paragraph(String(value || "To be confirmed"), x, width, 11, "F2", colors.dark, 4);
+  };
+  function addPage() {
+    pageIndex += 1;
+    pages.push([]);
+    y = pageHeight - margin;
+    rect(0, pageHeight - 34, pageWidth, 34, colors.dark);
+    text("codencode.my", margin, pageHeight - 22, 12, "F2", colors.white);
+    text(proposal.proposalId || "Proposal", pageWidth - margin - 80, pageHeight - 22, 9, "F1", colors.white);
+    y -= 32;
+  }
+
+  rect(0, pageHeight - 76, pageWidth, 76, colors.dark);
+  rect(0, pageHeight - 82, pageWidth, 6, colors.green);
+  text("codencode.my", margin, pageHeight - 45, 26, "F2", colors.white);
+  text("School Event / AI Workshop Proposal", margin, pageHeight - 112, 20, "F2", colors.dark);
+  text(proposal.proposalName || "Proposal", margin, pageHeight - 140, 13, "F1", colors.muted);
+  line(margin, pageHeight - 158, pageWidth - margin, pageHeight - 158, colors.green, 2);
+
+  rect(margin, pageHeight - 318, pageWidth - margin * 2, 118, colors.soft);
+  text("Prepared For", margin + 20, pageHeight - 230, 10, "F2", colors.green);
+  y = pageHeight - 258;
+  paragraph(schoolContext, margin + 20, pageWidth - margin * 2 - 40, 17, "F2", colors.dark, 6);
+  text(proposal.pic ? `PIC: ${proposal.pic}` : school?.pic ? `PIC: ${school.pic}` : "PIC: To be assigned", margin + 20, pageHeight - 294, 11, "F1", colors.muted);
+  text(`Prepared by CodeNCode | ${today}`, margin + 20, pageHeight - 312, 10, "F1", colors.muted);
+
+  const cardY = pageHeight - 520;
+  const cardW = (pageWidth - margin * 2 - 18) / 2;
+  rect(margin, cardY, cardW, 120, colors.white, true);
+  rect(margin + cardW + 18, cardY, cardW, 120, colors.white, true);
+  y = cardY + 88;
+  keyValue("CATEGORY", proposal.category, margin + 16, y, cardW - 32);
+  y = cardY + 45;
+  keyValue("AUDIENCE", audiences, margin + 16, y, cardW - 32);
+  y = cardY + 88;
+  keyValue("DURATION", proposal.duration || "To be confirmed", margin + cardW + 34, y, cardW - 32);
+  y = cardY + 45;
+  keyValue("INVESTMENT", `RM ${Number(proposal.price || 0).toLocaleString()}`, margin + cardW + 34, y, cardW - 32);
+
+  y = pageHeight - 585;
+  sectionTitle("Proposal Checklist");
+  ["School Name Updated", "Event Date Updated", "Pricing Updated", "Trainer Assigned", "Acceptance Page Completed"].forEach((item) => {
+    text("[ ]", margin + 8, y, 10, "F2", colors.green);
+    text(item, margin + 34, y, 10, "F1", colors.dark);
+    y -= 20;
+  });
+
+  addPage();
+  sectionTitle("Program Snapshot");
+  [
+    `Workshop topics: ${topics.join(", ") || "To be confirmed"}.`,
+    `Learning outcomes: ${outcomes.join(", ") || "To be confirmed"}.`,
+    "Reference format: CodeNCode school event proposal and premium AI workshop proposal.",
+  ].forEach((item) => bullet(item, margin, pageWidth - margin * 2));
+
+  sections.forEach((section) => {
+    sectionTitle(section.title, section.type);
+    section.lines.forEach((item) => bullet(item, margin, pageWidth - margin * 2));
+  });
+
+  sectionTitle("Acceptance Form");
+  const acceptanceRows = ["School Representative Name", "Position", "Signature", "Date", "Final Event Date"];
+  acceptanceRows.forEach((label) => {
+    if (y < 100) addPage();
+    text(`${label}:`, margin, y, 10, "F2", colors.dark);
+    line(margin + 170, y - 2, pageWidth - margin, y - 2, colors.line, 1);
+    y -= 30;
+  });
+  if (proposal.remarks) {
+    sectionTitle("Internal Remarks");
+    paragraph(proposal.remarks, margin, pageWidth - margin * 2, 9, "F1", colors.muted, 4);
+  }
+
+  const objects = [];
+  const add = (content) => {
+    objects.push(content);
+    return objects.length;
+  };
+  const catalogId = add("");
+  const pagesId = add("");
+  const fontId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica >>");
+  const boldFontId = add("<< /Type /Font /Subtype /Type1 /BaseFont /Helvetica-Bold >>");
+  const pageIds = [];
+  for (const page of pages) {
+    const stream = page.join("\n");
+    const contentId = add(`<< /Length ${Buffer.byteLength(stream, "latin1")} >>\nstream\n${stream}\nendstream`);
+    const pageId = add(`<< /Type /Page /Parent ${pagesId} 0 R /MediaBox [0 0 ${pageWidth} ${pageHeight}] /Resources << /Font << /F1 ${fontId} 0 R /F2 ${boldFontId} 0 R >> >> /Contents ${contentId} 0 R >>`);
+    pageIds.push(pageId);
+  }
+  objects[catalogId - 1] = `<< /Type /Catalog /Pages ${pagesId} 0 R >>`;
+  objects[pagesId - 1] = `<< /Type /Pages /Kids [${pageIds.map((id) => `${id} 0 R`).join(" ")}] /Count ${pageIds.length} >>`;
+
+  let pdf = "%PDF-1.4\n";
+  const offsets = [0];
+  objects.forEach((object, index) => {
+    offsets.push(Buffer.byteLength(pdf, "latin1"));
+    pdf += `${index + 1} 0 obj\n${object}\nendobj\n`;
+  });
+  const xref = Buffer.byteLength(pdf, "latin1");
+  pdf += `xref\n0 ${objects.length + 1}\n0000000000 65535 f \n`;
+  for (let i = 1; i <= objects.length; i += 1) {
+    pdf += `${String(offsets[i]).padStart(10, "0")} 00000 n \n`;
+  }
+  pdf += `trailer\n<< /Size ${objects.length + 1} /Root ${catalogId} 0 R >>\nstartxref\n${xref}\n%%EOF`;
+  return Buffer.from(pdf, "latin1");
+}
+
 function loadMemoryProposals() {
   let proposals = proposalSeedTemplates.map((proposal, index) => ({
     id: index + 1,
@@ -1374,7 +1544,7 @@ app.get("/api/proposals/:id/pdf", async (req, res, next) => {
     }
     if (!proposal) return res.status(404).json({ error: "Proposal not found." });
 
-    const pdf = buildPdf(proposalLines(proposal, school));
+    const pdf = buildProposalPdf(proposal, school);
     const filename = `${proposal.proposalId}-${proposal.proposalName}`.replace(/[^a-z0-9_-]+/gi, "-").replace(/-+/g, "-");
     res.setHeader("Content-Type", "application/pdf");
     res.setHeader("Content-Disposition", `attachment; filename="${filename}.pdf"`);
