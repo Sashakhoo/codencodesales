@@ -166,6 +166,11 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
 .table-tools{display:flex;gap:7px;align-items:center;flex-wrap:wrap}
 .prop-actions{white-space:nowrap}
 .account-grid{margin-top:12px;background:var(--surface);border:1px solid var(--border);border-radius:var(--rl);padding:12px}
+.template-guide{display:grid;grid-template-columns:repeat(auto-fit,minmax(190px,1fr));gap:9px}
+.template-step{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:10px}
+.template-type{font-family:'Space Mono',monospace;font-size:10px;color:var(--cyan-d);font-weight:700;margin-bottom:4px}
+.template-title{font-size:12px;font-weight:700;color:var(--text);margin-bottom:4px}
+.template-note{font-size:11px;color:var(--text2);line-height:1.4}
 @media(max-width:860px){.sidebar{width:54px}.sidebar .logo-mark,.sidebar .logo-sub,.sb-sec,.nav span,.sb-foot strong,.sb-foot p{display:none}.nav{justify-content:center;padding:9px}.content{padding:14px}.fg3{grid-template-columns:1fr 1fr}.sl-grid{grid-template-columns:1fr}}
 @media(max-width:580px){.kg{grid-template-columns:1fr 1fr}.fg3{grid-template-columns:1fr}.fg2{grid-template-columns:1fr}.ch-grid{grid-template-columns:1fr}.chp{grid-template-columns:repeat(3,1fr)}}
 </style>
@@ -277,6 +282,13 @@ input[type=range]{width:100%;accent-color:var(--cyan)}
           <select class="fsel" id="pcat" onchange="renderProposals()"><option value="">All categories</option><option>AI Workshop</option><option>Coding Workshop</option><option>Career Exposure</option><option>Teacher Training</option><option>Holiday Program</option><option>Corporate Training</option><option>Competition/Event</option><option>Custom Program</option></select>
           <select class="fsel" id="pdur" onchange="renderProposals()"><option value="">All durations</option><option>1 Hour Talk</option><option>2 Hour Workshop</option><option>Half Day</option><option>Full Day</option><option>4 Weeks</option><option>8 Weeks</option></select>
           <button class="btn btn-sm" onclick="clearProposalFilters()"><i class="ti ti-filter-off"></i> Clear</button>
+        </div>
+        <div class="template-guide">
+          <div class="template-step"><div class="template-type">TYPE A</div><div class="template-title">Client Understanding</div><div class="template-note">AS-IS, need, TO-BE, and proposal direction tailored to the school/company.</div></div>
+          <div class="template-step"><div class="template-type">TYPE B</div><div class="template-title">Strategy & Value</div><div class="template-note">Three differentiators, why codencode fits, and expected value.</div></div>
+          <div class="template-step"><div class="template-type">TYPE J</div><div class="template-title">Training Plan</div><div class="template-note">Audience, topics, learning transfer checklist, and activity flow.</div></div>
+          <div class="template-step"><div class="template-type">TYPE F</div><div class="template-title">Schedule & Deliverables</div><div class="template-note">Milestones, session duration, deliverables, and reporting flow.</div></div>
+          <div class="template-step"><div class="template-type">TYPE I</div><div class="template-title">Outcomes & Next Steps</div><div class="template-note">Outcome tags, investment, qualitative value, and approval next steps.</div></div>
         </div>
         <div id="proposalKanban"></div>
         <div class="tc" id="proposalTableWrap" style="display:none"><div class="tw"><table>

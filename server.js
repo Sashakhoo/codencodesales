@@ -402,15 +402,79 @@ function findSchoolByName(name) {
   return memory.schools.find((school) => school.name.toLowerCase() === target) || null;
 }
 
+function proposalTemplateSections(proposal, school) {
+  const client = proposal.client || "Client / School";
+  const audiences = (proposal.audiences || []).join(", ") || "target participants";
+  const topics = proposal.topics || [];
+  const outcomes = proposal.outcomes || [];
+  const schoolType = school?.cat || "education partner";
+  return [
+    {
+      type: "A",
+      title: "1. Client Understanding and Current Need",
+      lines: [
+        school
+          ? `${school.name} is a ${schoolType} in ${school.city}, ${school.state}. The proposal should position codencode.my as an enrichment partner that can adapt to school timetable, venue, and student readiness.`
+          : `${client} requires a concise, adaptable proposal that can be finalised once participant level, preferred language, venue, and group size are confirmed.`,
+        `AS-IS: many learners are exposed to technology as users, but have limited structured practice in ${topics[0] || "coding and AI"}.`,
+        `TO-BE: participants complete a guided, practical session with visible outputs and clearer confidence in ${topics.join(", ") || "future-ready digital skills"}.`,
+        "Proposal direction: combine short concept briefing, facilitator-led hands-on practice, and a mini showcase/reflection.",
+      ],
+    },
+    {
+      type: "B",
+      title: "2. Proposal Strategy and Differentiation",
+      lines: [
+        "Differentiator 1 - Trilingual delivery: English, Mandarin, or Bahasa Melayu can be used based on participant preference.",
+        "Differentiator 2 - Beginner-safe pacing: activities are scaffolded so first-time learners can participate without prior coding experience.",
+        "Differentiator 3 - Project-based output: every session is designed around a tangible mini outcome instead of passive lecture only.",
+        `Expected effect: stronger ${outcomes.join(", ") || "AI literacy, problem solving, and future skills"} for ${audiences}.`,
+      ],
+    },
+    {
+      type: "J",
+      title: "3. Training Plan and Learning Transfer",
+      lines: [
+        `Training audience: ${audiences}.`,
+        `Core topic plan: ${topics.length ? topics.join(" | ") : "Topic mix to be confirmed"}.`,
+        ...topics.map((topic) => `${topic}: ${topicPlan(topic)}`),
+        "Learning transfer checklist: examples are contextualised, participants practise during the session, facilitators answer questions, and optional post-session support can be provided.",
+      ],
+    },
+    {
+      type: "F",
+      title: "4. Schedule, Milestones, and Deliverables",
+      lines: [
+        `Duration: ${proposal.duration || "To be confirmed"}.`,
+        "Milestone 1: Confirm scope, audience level, preferred language, venue, and final participant count.",
+        "Milestone 2: Prepare slides, activity files, facilitator notes, and student-ready materials.",
+        "Milestone 3: Deliver workshop/talk and collect feedback or showcase outputs.",
+        "Deliverables: session slides, activity materials, attendance/feedback summary, and certificate list where applicable.",
+      ],
+    },
+    {
+      type: "I",
+      title: "5. Outcomes, Value, and Next Steps",
+      lines: [
+        `Investment: RM ${Number(proposal.price || 0).toLocaleString()}.`,
+        `Learning outcome tags: ${(outcomes.length ? outcomes : ["AI Literacy", "Future Skills", "Problem Solving"]).join(", ")}.`,
+        "Qualitative value: participants leave with clearer digital confidence, practical vocabulary, and a stronger sense of how coding/AI applies to study or work.",
+        "Next steps: confirm date, group size, language, and approval pathway; codencode.my will issue the final PDF and invoice after confirmation.",
+      ],
+    },
+  ];
+}
+
 function proposalLines(proposal, school) {
   const client = proposal.client || "Client / School";
   const schoolContext = school ? `${school.name}, ${school.city}, ${school.state}` : client;
   const audiences = (proposal.audiences || []).join(", ") || "Target audience to be confirmed";
   const topics = proposal.topics || [];
   const outcomes = proposal.outcomes || [];
+  const templateSections = proposalTemplateSections(proposal, school);
   return [
     { text: "codencode.my", size: 20, font: "F2" },
-    { text: "Proposal Document", size: 15, font: "F2" },
+    { text: "Proposal Template", size: 15, font: "F2" },
     { text: `${proposal.proposalId} | ${proposal.proposalName}`, size: 11, font: "F1" },
     { text: "", size: 8, font: "F1" },
     { text: "Prepared For", size: 13, font: "F2" },
@@ -424,45 +488,18 @@ function proposalLines(proposal, school) {
     { text: `Duration: ${proposal.duration || "To be confirmed"}`, size: 11, font: "F1" },
     { text: `Investment: RM ${Number(proposal.price || 0).toLocaleString()}`, size: 11, font: "F1" },
     { text: "", size: 8, font: "F1" },
-    { text: "Executive Summary", size: 13, font: "F2" },
+    { text: "Template Logic", size: 13, font: "F2" },
     {
-      text: `This proposal outlines a ${proposal.category.toLowerCase()} designed for ${client}. The program is tailored for ${audiences.toLowerCase()} and focuses on practical, beginner-friendly learning that students or participants can apply immediately.`,
+      text: "This template applies the section-type guide: A for client understanding, B for strategy, J for training design, F for schedule/WBS, and I for outcomes/value.",
       size: 11,
       font: "F1",
     },
     { text: "", size: 8, font: "F1" },
-    { text: "Recommended Topics", size: 13, font: "F2" },
-    ...topics.flatMap((topic) => [
-      { text: `- ${topic}`, size: 11, font: "F2" },
-      { text: topicPlan(topic), size: 10, font: "F1" },
+    ...templateSections.flatMap((section) => [
+      { text: `${section.title} (Type ${section.type})`, size: 13, font: "F2" },
+      ...section.lines.map((line) => ({ text: `- ${line}`, size: 10, font: "F1" })),
+      { text: "", size: 8, font: "F1" },
     ]),
-    { text: "", size: 8, font: "F1" },
-    { text: "Learning Outcomes", size: 13, font: "F2" },
-    ...(outcomes.length ? outcomes : ["AI Literacy", "Future Skills", "Problem Solving"]).map((outcome) => ({
-      text: `- ${outcome}`,
-      size: 11,
-      font: "F1",
-    })),
-    { text: "", size: 8, font: "F1" },
-    { text: "Delivery Approach", size: 13, font: "F2" },
-    { text: "1. Short concept briefing with examples relevant to the audience.", size: 11, font: "F1" },
-    { text: "2. Guided hands-on activity with facilitator support.", size: 11, font: "F1" },
-    { text: "3. Mini showcase or reflection so participants leave with a visible output.", size: 11, font: "F1" },
-    { text: "4. Optional post-session WhatsApp support and certificate of completion.", size: 11, font: "F1" },
-    { text: "", size: 8, font: "F1" },
-    { text: "School / Client Fit", size: 13, font: "F2" },
-    {
-      text: school
-        ? `For ${school.name}, this program can be positioned as a ${school.cat || "school"} enrichment initiative for students in ${school.city}. The content can be adjusted for school timetable, venue constraints, and student readiness.`
-        : "The proposal can be adapted after the client confirms participant level, venue, preferred language, and target learning outcome.",
-      size: 11,
-      font: "F1",
-    },
-    { text: "", size: 8, font: "F1" },
-    { text: "Next Steps", size: 13, font: "F2" },
-    { text: "- Confirm preferred date, group size, and venue.", size: 11, font: "F1" },
-    { text: "- Finalise topic mix and language preference.", size: 11, font: "F1" },
-    { text: "- Issue final PDF proposal and invoice once approved.", size: 11, font: "F1" },
     { text: proposal.remarks ? `Remarks: ${proposal.remarks}` : "", size: 10, font: "F1" },
   ].filter((line) => line.text !== "");
 }
