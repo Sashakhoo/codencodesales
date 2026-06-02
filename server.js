@@ -536,57 +536,86 @@ function proposalTemplateSections(proposal, school) {
   const topics = proposal.topics || [];
   const outcomes = proposal.outcomes || [];
   const schoolType = school?.cat || "education partner";
+  const deliveryMode = proposal.duration === "1 Hour Talk" ? "Physical or online talk" : "Physical or online workshop";
+  const participantCapacity = proposal.duration?.includes("Weeks") ? "Cohort size to be confirmed" : "30-80 participants recommended";
   return [
     {
       type: "A",
-      title: "1. Client Understanding and Current Need",
+      title: "1. Executive Summary",
       lines: [
         school
           ? `${school.name} is a ${schoolType} in ${school.city}, ${school.state}. The proposal should position codencode.my as an enrichment partner that can adapt to school timetable, venue, and student readiness.`
           : `${client} requires a concise, adaptable proposal that can be finalised once participant level, preferred language, venue, and group size are confirmed.`,
-        `AS-IS: many learners are exposed to technology as users, but have limited structured practice in ${topics[0] || "coding and AI"}.`,
-        `TO-BE: participants complete a guided, practical session with visible outputs and clearer confidence in ${topics.join(", ") || "future-ready digital skills"}.`,
-        "Proposal direction: combine short concept briefing, facilitator-led hands-on practice, and a mini showcase/reflection.",
+        `This proposal recommends a ${proposal.category} for ${audiences}, focused on ${topics.join(", ") || "future-ready digital skills"}.`,
+        `Expected outcome: participants gain practical confidence in ${outcomes.join(", ") || "AI literacy, coding, and problem solving"} through guided hands-on learning.`,
+        "The program can be customised to school timetable, participant readiness, preferred language, venue, and final group size.",
       ],
     },
     {
       type: "B",
-      title: "2. Proposal Strategy and Differentiation",
+      title: "2. About CodeNCode and Why This Matters",
       lines: [
+        "CodeNCode delivers beginner-friendly coding, AI, and digital skills programs for schools, parents, students, and working adults.",
+        "Mission: make future-ready technology education practical, accessible, and confidence-building for learners with different starting points.",
+        "Why it matters: AI literacy and coding exposure help students understand digital transformation, future careers, and responsible technology use.",
         "Differentiator 1 - Trilingual delivery: English, Mandarin, or Bahasa Melayu can be used based on participant preference.",
         "Differentiator 2 - Beginner-safe pacing: activities are scaffolded so first-time learners can participate without prior coding experience.",
         "Differentiator 3 - Project-based output: every session is designed around a tangible mini outcome instead of passive lecture only.",
-        `Expected effect: stronger ${outcomes.join(", ") || "AI literacy, problem solving, and future skills"} for ${audiences}.`,
       ],
     },
     {
       type: "J",
-      title: "3. Training Plan and Learning Transfer",
+      title: "3. Proposed Workshop / Event Overview",
       lines: [
+        `Program title: ${proposal.proposalName}.`,
         `Training audience: ${audiences}.`,
+        `Duration: ${proposal.duration || "To be confirmed"}.`,
+        `Delivery mode: ${deliveryMode}.`,
+        `Venue: ${school ? `${school.name} campus or online` : "Client venue or online"}.`,
+        `Expected participants: ${participantCapacity}.`,
         `Core topic plan: ${topics.length ? topics.join(" | ") : "Topic mix to be confirmed"}.`,
+      ],
+    },
+    {
+      type: "J",
+      title: "4. Learning Outcomes and Workshop Modules",
+      lines: [
+        `Learning outcomes: ${(outcomes.length ? outcomes : ["AI Literacy", "Future Skills", "Problem Solving"]).join(", ")}.`,
         ...topics.map((topic) => `${topic}: ${topicPlan(topic)}`),
-        "Learning transfer checklist: examples are contextualised, participants practise during the session, facilitators answer questions, and optional post-session support can be provided.",
+        "Module 1 - Introduction: set context, key concepts, and learner goals.",
+        "Module 2 - Hands-on activity: guided practice with facilitator support.",
+        "Module 3 - Project building: participants create a simple output linked to the topic.",
+        "Module 4 - Showcase and Q&A: reflection, sharing, and next-step guidance.",
       ],
     },
     {
       type: "F",
-      title: "4. Schedule, Milestones, and Deliverables",
+      title: "5. Sample Program Schedule and Deliverables",
       lines: [
-        `Duration: ${proposal.duration || "To be confirmed"}.`,
-        "Milestone 1: Confirm scope, audience level, preferred language, venue, and final participant count.",
-        "Milestone 2: Prepare slides, activity files, facilitator notes, and student-ready materials.",
-        "Milestone 3: Deliver workshop/talk and collect feedback or showcase outputs.",
-        "Deliverables: session slides, activity materials, attendance/feedback summary, and certificate list where applicable.",
+        "Opening: welcome, objectives, and relevance to students or staff.",
+        "Concept briefing: short explanation with real-life examples.",
+        "Practical build: guided activity, project work, and facilitator checkpoints.",
+        "Showcase: selected participant outputs, Q&A, feedback, and next steps.",
+        "Deliverables: training materials, certificate of participation, project files, attendance or feedback summary, and optional post-event support.",
       ],
     },
     {
       type: "I",
-      title: "5. Outcomes, Value, and Next Steps",
+      title: "6. Pricing Package and Customisation Options",
       lines: [
         `Investment: RM ${Number(proposal.price || 0).toLocaleString()}.`,
-        `Learning outcome tags: ${(outcomes.length ? outcomes : ["AI Literacy", "Future Skills", "Problem Solving"]).join(", ")}.`,
+        `Package basis: ${proposal.duration || "duration to be confirmed"} for ${audiences}.`,
+        "Customisation options: school-specific projects, STEM integration, AI competition format, career talk add-on, or holiday camp format.",
         "Qualitative value: participants leave with clearer digital confidence, practical vocabulary, and a stronger sense of how coding/AI applies to study or work.",
+      ],
+    },
+    {
+      type: "I",
+      title: "7. Requirements, Terms, and Acceptance",
+      lines: [
+        "Equipment requirements: internet access, projector/screen, suitable venue setup, and laptops/tablets where hands-on activities require devices.",
+        "Payment terms, cancellation policy, minimum participant count, trainer assignment, event date, photos, and testimonials can be finalised before confirmation.",
+        "Acceptance fields: school representative name, position, signature, date, final event date, pricing confirmation, and trainer assigned.",
         "Next steps: confirm date, group size, language, and approval pathway; codencode.my will issue the final PDF and invoice after confirmation.",
       ],
     },
@@ -600,25 +629,34 @@ function proposalLines(proposal, school) {
   const topics = proposal.topics || [];
   const outcomes = proposal.outcomes || [];
   const templateSections = proposalTemplateSections(proposal, school);
+  const today = new Date().toISOString().slice(0, 10);
   return [
     { text: "codencode.my", size: 20, font: "F2" },
-    { text: "Proposal Template", size: 15, font: "F2" },
+    { text: "School Event / AI Workshop Proposal", size: 15, font: "F2" },
     { text: `${proposal.proposalId} | ${proposal.proposalName}`, size: 11, font: "F1" },
     { text: "", size: 8, font: "F1" },
     { text: "Prepared For", size: 13, font: "F2" },
     { text: schoolContext, size: 11, font: "F1" },
     { text: proposal.pic ? `PIC: ${proposal.pic}` : school?.pic ? `PIC: ${school.pic}` : "PIC: To be assigned", size: 11, font: "F1" },
     { text: school?.email ? `Contact: ${school.email}${school.phone ? ` | ${school.phone}` : ""}` : "", size: 10, font: "F1" },
+    { text: `Prepared by: CodeNCode / codencode.my | Date: ${today}`, size: 10, font: "F1" },
     { text: "", size: 8, font: "F1" },
     { text: "Program Snapshot", size: 13, font: "F2" },
     { text: `Category: ${proposal.category}`, size: 11, font: "F1" },
     { text: `Audience: ${audiences}`, size: 11, font: "F1" },
     { text: `Duration: ${proposal.duration || "To be confirmed"}`, size: 11, font: "F1" },
     { text: `Investment: RM ${Number(proposal.price || 0).toLocaleString()}`, size: 11, font: "F1" },
+    { text: `Workshop topics: ${topics.join(", ") || "To be confirmed"}`, size: 11, font: "F1" },
+    { text: `Learning outcomes: ${outcomes.join(", ") || "To be confirmed"}`, size: 11, font: "F1" },
     { text: "", size: 8, font: "F1" },
-    { text: "Template Logic", size: 13, font: "F2" },
+    { text: "Template Reference", size: 13, font: "F2" },
     {
-      text: "This template applies the section-type guide: A for client understanding, B for strategy, J for training design, F for schedule/WBS, and I for outcomes/value.",
+      text: "This proposal follows the CodeNCode school event and premium AI workshop templates: executive summary, company profile, event overview, outcomes, modules, deliverables, pricing, requirements, terms, and acceptance.",
+      size: 11,
+      font: "F1",
+    },
+    {
+      text: "It also applies the section-type guide: A for client understanding, B for strategy, J for training design, F for schedule/WBS, and I for outcomes/value.",
       size: 11,
       font: "F1",
     },
